@@ -1,0 +1,50 @@
+﻿Tagger Build Rules:
+
+
+1) Keep in mind you are representing the Collablab with this project, so no obscenity or offensive designs.  I expect you all to be better than that, but for officialiality it needs to be said.
+
+
+2) We will undoubtedly be playing on campus, and that means that we have to abide by WPI’s rules.  You all know what they are.
+
+
+3) Tagger design must not imitate any kind of real firearms or other weaponry and must not be able to be mistaken for such weaponry.  We will be playing in Worcester, so design a tagger that won’t get you shot in real life.  THE TAGGER YOU DESIGN MUST NOT IMITATE A FIREARM IN ANY WAY.  ALL TAGGER DESIGNS MUST BE APPROVED BY AN ADMIN BEFORE CONSTRUCTED.
+
+
+4) The more obvious you make the fact that your tagger is a toy the better, but don’t feel any pressure to do so.  As long as it doesn’t look like a real weapon you should be fine.
+
+
+5) Try to design a tagger that fits with who you are.  If you are a huge Harry Potter fan you should consider a wand, if you’re a huge Star Trek fan make a phaser, something like that.  You don’t have to, but it’s something to think about.  
+
+
+6) NO AUTONOMOUS OR REMOTE OPERATED TAGGERS.  A quadrotor or rc car is not an honorable way to do battle.  A shoulder mounted turret however is ok.
+
+
+7) The receiver module can either be mounted on the tagger or the player.  In either case the receiver must be as visible as possible and must not have any kind of opaque shielding.  
+
+
+8) SAFETY: If your tagger is head mounted make sure it does not obstruct your vision
+
+
+9) SAFETY 2: NO LASERS SHOULD BE USED ON YOUR TAGGER PERIOD.  NOT FOR AIMING, TARGETING OR ANYTHING ELSE.  
+
+
+10) SAFETY 3: NO TAGGERS INVOLVING PHYSICAL CONTACT WITH OTHER PLAYERS.
+
+
+If you have any questions on the rules contact a game admin.  
+GAME ADMINS:
+Greg Tighe
+Nick Hassan
+
+
+
+
+Some ideas to get you started:
+
+
+Magic Wand
+Iron Man Repulsors
+Star Trek Phaser
+Foam Finger Glove
+Shoulder Turret
+Cyclops (X-MEN) Visor
