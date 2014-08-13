@@ -18,6 +18,7 @@
 const int mag_size = 12  // anything under 30 is fair
 const int health = 10 // don't change this
 const char fire_type = s // s = semi, b = 3 round burst, a = auto.
+const int burst_size = 3 // number of shots to be fired per burst
 
 // Interactive pins
 const int trigger_pin = XX // pin for the trigger
@@ -40,6 +41,8 @@ const boolean custom_displays = false // change this to true if you have health/
 // Would be useful for mapping health/ammo onto LED displays
 volatile int current_mag = mag_size // stores the user's current rounds in their mag
 volatile int current_health = health // stores the user's current health
+volatile int old_mag = current_mag // used to keep the displays from updating continuously
+volatile int old_health = current_health // used to keep the displays from updating continuously
 
 volatile boolean enabled = true // flag to stop tagger functions on zero health
 volatile boolean shoot_flag = true // used to create semi functionality in semi and burst modes
@@ -70,7 +73,7 @@ void loop(){
       shoot_flag = false;
     }
     if(fire_type == 'b'){
-      for(int i = 3, i > 0, i--){
+      for(int i = burst_size, i > 0, i--){
         fire();
       }
       shoot_flag = false;
@@ -93,7 +96,11 @@ void loop(){
   // DISPLAY CODE -------------------------------------------------------------
   
   if(custom_displays){
-    update_displays(current_mag, current_health); // calls the display function (YOU WRITE THAT)
+    if((current_mag != old_mag) || (current_health != old_health)){
+      old_mag = current_mag;
+      old_health = current_health;
+      update_displays(current_mag, current_health); // calls the display function (YOU WRITE THAT)
+    }
   }
   
   // RELOAD CODE --------------------------------------------------------------
@@ -127,7 +134,7 @@ void hit(){
   if(enabled){
     current_health--;
     hit_flag = true;
-    if(current_health == 0){
+    if(current_health <= 0){
       enabled = false; // turn off tagger functions by setting this to false
       // add more stuffs here if you want more of a heads-up you're out of the match
     }
