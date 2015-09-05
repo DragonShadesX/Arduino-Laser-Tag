@@ -1,8 +1,8 @@
 Arduino-Laser-Tag
 =================
 
-A repository for my arduino laser tag stuffs
+A repository for my arduino laser tag files
 
-So far not much here.  V1 is broken, just here because why not.  FIrst attempts are important.
+The idea is to create a laser tag system comparable to commercial grade systems found at arenas.
 
-V1.1 is the current build.  Will add more files for different taggers as I get/make them.
+So far the only things here are proof of concept files, no actual full systems code yet.
