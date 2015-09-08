@@ -28,7 +28,7 @@ int OVERHEAT_ALERT_LED_PIN = XX;
 int HIT_ALERT_LED_PIN = XX;
 
 // length of time in milliseconds that the hit alert LED should stay lit after being hit
-int alert_length = XX;
+unsigned int alert_length = XX;  //I reccomend 200
 
 //------------------------------DO NOT MODIFY VARIABLES BELOW------------------------------
 

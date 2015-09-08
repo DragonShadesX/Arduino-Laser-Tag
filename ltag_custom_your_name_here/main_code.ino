@@ -18,8 +18,8 @@ void setup() {
 
 void loop() {
 
-  // if trigger pressed and tagger not overheated and     trigger released and 200ms passed since last fire
-  if(digitalRead(TRIGGER_PIN) && !overheated      &&       fire_ready && (millis() - last_fire > 200) ){
+  // if trigger pressed and tagger not overheated and  tagger is still alive      trigger released and 200ms passed since last fire
+  if(digitalRead(TRIGGER_PIN) && !overheated      &&   (health > 0)   &&          fire_ready && (millis() - last_fire > 200) ){
     // fire
     irsend.sendRC6(0xffffffff, 32);
     // re-enable the receiver (it was disabled to stop tagger from reflecting and tagging itself)
@@ -46,6 +46,8 @@ void loop() {
     digitalWrite(HIT_ALERT_LED_PIN, HIGH);
     // update last time hit
     last_hit = millis();
+    // allow IR signals to be recieved again
+    irrecv.resume();
   }
 
   // if the alert duration has passed 
@@ -62,10 +64,12 @@ void loop() {
     last_cooldown = millis();
   }
 
-  // if tagger is overheated
-  if(heat >= 10){
+  // if tagger just reached overheated state
+  if(heat >= 10 && !overheated){
     // update variable accordingly
     overheated = true;
+    // add to heat to create a longer cooldown of 2 seconds
+    heat = 20;
     // turn on overheat alert LED
     digitalWrite(OVERHEAT_ALERT_LED_PIN, HIGH);
   }
@@ -76,5 +80,12 @@ void loop() {
     overheated = false;
     // turn off overheat alert LED
     digitalWrite(OVERHEAT_ALERT_LED_PIN, LOW);
+  }
+
+  // if health is zero or less that zero
+  if(health <= 0) {
+    //light both LEDs to indicate you are out of the game
+    digitalWrite(OVERHEAT_ALERT_LED_PIN, HIGH);
+    digitalWrite(HIT_ALERT_LED_PIN, HIGH);
   }
 }
