@@ -14,13 +14,16 @@
 
 #define LED_PIN  5 //has to be 5 for a teensy
 #define RECV_PIN  4
-#define TRIGGER_PIN  20
-#define RELOAD_PIN  21
+// #define TRIGGER_PIN  20
+// #define RELOAD_PIN  21
 #define HAPTICS_VIBRATE_PIN  16
 #define HAPTICS_SOLENOID_PIN  17
 #define SHIFT_REGISTER_DATA_PIN  0
 #define SHIFT_REGISTER_CLOCK_PIN  2
 #define SHIFT_REGISTER_LATCHCLOCK  1
+#define SHIFT_INPUT_DATA_PIN  XX
+#define SHIFT_INPUT_CLOCK_PIN  XX
+#define SHIFT_INPUT_LATCH_PIN  XX
 #define SDCARD_CS_PIN    10
 #define SDCARD_MOSI_PIN  7
 #define SDCARD_SCK_PIN   14
@@ -61,6 +64,8 @@ long last_load = 0L;
 boolean fire_ready = true;
 boolean solenoid_active = false;
 boolean buzzer_active = false;
+booelan trigger_read = false;
+boolean reload_read = false;
 
 
 

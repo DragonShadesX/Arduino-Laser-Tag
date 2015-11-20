@@ -36,3 +36,13 @@ void update_displays(int hp, int eng, boolean red, boolean green, boolean blue){
   delayMicroseconds(5);
 }
 
+void update_inputs(){
+  digitalWrite(SHIFT_INPUT_LATCH_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(SHIFT_INPUT_LATCH_PIN, LOW);
+  delayMicroseconds(5);
+  digitalWrite(SHIFT_INPUT_LATCH_PIN, HIGH);
+  byte read_data_in = shiftIn(SHIFT_INPUT_DATA_PIN, SHIFT_INPUT_CLOCK_PIN, MSBFIRST);
+  trigger_read = read_data_in[7];
+  reload_read = read_data_in[6];
+}

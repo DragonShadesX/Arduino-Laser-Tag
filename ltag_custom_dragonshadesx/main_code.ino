@@ -5,13 +5,16 @@
 //------------------------------DO NOT MODIFY CODE BELOW------------------------------
 
 void setup() {
-  pinMode(TRIGGER_PIN, INPUT_PULLUP);
-  pinMode(RELOAD_PIN, INPUT_PULLUP);
+  // pinMode(TRIGGER_PIN, INPUT_PULLUP);
+  // pinMode(RELOAD_PIN, INPUT_PULLUP);
   pinMode(HAPTICS_VIBRATE_PIN, OUTPUT);
   pinMode(HAPTICS_SOLENOID_PIN, OUTPUT);
   pinMode(SHIFT_REGISTER_DATA_PIN, OUTPUT);
   pinMode(SHIFT_REGISTER_CLOCK_PIN, OUTPUT);
   pinMode(SHIFT_REGISTER_LATCHCLOCK, OUTPUT);
+  pinMode(SHIFT_INPUT_DATA_PIN, INPUT);
+  pinMode(SHIFT_INPUT_CLOCK_PIN, OUTPUT);
+  pinMode(SHIFT_INPUT_LATCH_PIN, OUTPUT);
   irrecv.enableIRIn();
   Serial.begin(9600);
   //audio setup
@@ -26,12 +29,14 @@ void setup() {
   update_displays(health, ammo, false, false, false);
 //------------------------------DO NOT MODIFY CODE ABOVE------------------------------
   
-  
+  digitalWrite(HAPTICS_VIBRATE_PIN, HIGH);
 }
 
 void loop() {
 
-  if(!digitalRead(TRIGGER_PIN) && fire_ready && !reloading){
+  update_inputs();
+
+  if(trigger_read && fire_ready && !reloading){
     irsend.sendRC6(0xffffffff, 32);
     Serial.println("fire");
     irrecv.enableIRIn();
@@ -49,7 +54,7 @@ void loop() {
   if(irrecv.decode(&results)){
     health--;
     Serial.println("hit");
-    digitalWrite(HAPTICS_VIBRATE_PIN, HIGH); 
+    // digitalWrite(HAPTICS_VIBRATE_PIN, HIGH); 
     buzzer_active = true;
     last_hit = millis();
     irrecv.resume();
@@ -60,7 +65,7 @@ void loop() {
 
   // turn off vibration motor 
   if(millis() - last_hit > alert_length && buzzer_active){
-    digitalWrite(HAPTICS_VIBRATE_PIN, LOW);
+    // digitalWrite(HAPTICS_VIBRATE_PIN, LOW);
     update_displays(health, ammo, false, false, millis() - last_fire < slide_length);
     buzzer_active = false;
   }
@@ -73,7 +78,7 @@ void loop() {
   }
 
   // if reload button pushed
-  if(!reloading && !digitalRead(RELOAD_PIN) && (ammo < mag_size) ){
+  if(!reloading && reload_read && (ammo < mag_size) ){
     reloading = true;
     Serial.println("reloading");
   }
@@ -96,7 +101,7 @@ void loop() {
   }
 
   // run checks to tell if tagger is ready to fire again
-  if( digitalRead(TRIGGER_PIN) && !fire_ready && (health > 0) && (ammo > 0) && (millis() - last_fire > 200)){
+  if( !trigger_read && !fire_ready && (health > 0) && (ammo > 0) && (millis() - last_fire > 200)){
     fire_ready = true;
   }
 
