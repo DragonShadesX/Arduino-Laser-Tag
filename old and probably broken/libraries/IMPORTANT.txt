@@ -1,0 +1,7 @@
+So in order to get the SFEMP3 library to work on the DUE I had to comment out a few lines.
+
+Nothing too major, just the sei() and cli() calls.  You can find them all by ctrl+f for lines with unikitty in them.  Those are the lines I changed.  
+
+In theory all this should do is allow interrupts to happen during parts where they shouldn't happen.
+
+Just don't use interrupts in your code and hopefully everything will be allright. 
