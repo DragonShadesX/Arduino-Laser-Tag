@@ -1,0 +1,20 @@
+teensy x7 (4tag, 2base, 1admin)
+audio shield x4
+speakers x8
+shift registers x16
+rgb led x64
+resistors for LEDs xlots (for rgb, bar graphs, and 7segs)
+led bar graphs xseveral (Alan -blue green) (Jake -blue yellow)
+led 7 segs xfew
+irleds x7
+irrecvs x27
+limit switches x8
+usb 3.o type a ports x12 
+lcd display x1
+d-pad x1
+rechargables x7
+AA holder (single) x7
+AAs x8
+pager motors x4
+irf520-510 x7
+usb 3.0 3ft cables (type a - type a)

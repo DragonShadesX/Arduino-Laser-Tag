@@ -1,0 +1,38 @@
+Message Format: 8 bytes of data
+
+First Byte - Team
+
+0 - ADMIN box
+1-8 Team X
+9 - Free For All (damage everyone)
+A - Human
+B - Infected
+C - 
+D - 
+E - 
+F - Base
+
+Second Byte - Function (of pulse)
+
+0 - Set up
+1 - Damage
+2 - Refill
+
+Third Byte - Amount
+
+If second byte is
+0 - Max Health
+1 - Damage of "laser"
+2 - Health to refill
+
+Fourth Byte - Amount
+If second byte is
+0 - Max Ammo
+1 - Extra damage (if used)
+2 - Ammo to refill
+
+Fifth -Eighth Byte - ID
+ID Number
+If bytes 1 and 2 are 0, it sets the ID of the tagger
+
+Checks will be in place to make sure only the admin tool can send first and second byte as 0
