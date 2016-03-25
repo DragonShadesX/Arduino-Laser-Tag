@@ -2,6 +2,7 @@ teensy x7 (4tag, 2base, 1admin)
 audio shield x4
 speakers x8
 shift registers x16
+shift registers in x4
 rgb led x64
 resistors for LEDs xlots (for rgb, bar graphs, and 7segs)
 led bar graphs xseveral (Alan -blue green) (Jake -blue yellow)
@@ -18,3 +19,4 @@ AAs x8
 pager motors x4
 irf520-510 x7
 usb 3.0 3ft cables (type a - type a)
+5pin ribbon cable
