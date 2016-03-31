@@ -1,22 +1,28 @@
-teensy x7 (4tag, 2base, 1admin)
-audio shield x4
-speakers x8
-shift registers x16
-shift registers in x4
-rgb led x64
-resistors for LEDs xlots (for rgb, bar graphs, and 7segs)
-led bar graphs xseveral (Alan -blue green) (Jake -blue yellow)
-led 7 segs xfew
-irleds x7
-irrecvs x27
-limit switches x8
-usb 3.o type a ports x12 
-lcd display x1
-d-pad x1
-rechargables x7
-AA holder (single) x7
-AAs x8
-pager motors x4
-irf520-510 x7
-usb 3.0 3ft cables (type a - type a)
-5pin ribbon cable
+	 -s teensy x5 (4tag, 2base, 1admin)
+	 -s audio shield x4
+	 -s audio amps
+
+ -m 3.3vreg
+ -s diodes
+	 -a usd card
+	 -m speakers x8
+ -m shift registers x16
+ -m shift registers in x4
+	 -s rgb led x64
+ -m resistors for LEDs xlots (for rgb, bar graphs, and 7segs)
+ -s led bar graphs xseveral (Alan -blue green) (Jake -blue yellow)
+ -s led 7 segs xfew
+	 -m irleds x7
+	 -m irrecvs x27
+ -s limit switches x8
+ -m usb 3.o type a ports x12 
+	 -s lcd display x1
+	 -o d-pad x1
+	 -a rechargables x4
+ -m AA holder (single) x5
+	 -o AAs x8
+	 -s pager motors x4
+	 -m irf520-510 x7
+ -a usb 3.0 3ft cables (type a - type a)
+usb micro plug
+ -s 5pin ribbon cable
