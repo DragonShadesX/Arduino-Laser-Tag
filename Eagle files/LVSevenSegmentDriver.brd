@@ -146,8 +146,9 @@
 <text x="46.99" y="19.685" size="0.889" layer="22" rot="MR0">D</text>
 <text x="46.99" y="23.495" size="0.889" layer="22" rot="MR180">GND</text>
 <text x="48.895" y="40.64" size="0.889" layer="22" rot="MR270">GND</text>
-<text x="41.91" y="27.305" size="0.762" layer="22" rot="MR270">7 Seg Driver
+<text x="41.91" y="27.305" size="0.762" layer="22" rot="MR270">LV 7 Seg Driver
 Alan F - V1.0</text>
+<text x="48.895" y="37.465" size="1.778" layer="22" rot="MR270">LazerTag</text>
 </plain>
 <libraries>
 <library name="wirepad">
