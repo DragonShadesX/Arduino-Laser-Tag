@@ -146,6 +146,8 @@
 <wire x1="-1.27" y1="35.55" x2="-1.27" y2="0" width="0" layer="20"/>
 <text x="1.27" y="21.59" size="1.778" layer="25" rot="R90">VCC</text>
 <text x="16.51" y="26.67" size="1.778" layer="25" rot="R270">GND</text>
+<text x="13.97" y="31.75" size="1.778" layer="25">-</text>
+<text x="5.08" y="31.75" size="1.778" layer="25">~</text>
 </plain>
 <libraries>
 <library name="my_try">
@@ -168,27 +170,6 @@
 <wire x1="1.39" y1="-16.27" x2="1.39" y2="1.23" width="0.127" layer="21"/>
 <wire x1="1.39" y1="1.23" x2="-15.61" y2="1.23" width="0.127" layer="21"/>
 <text x="-15.24" y="1.27" size="1.27" layer="21">&gt;NAME</text>
-</package>
-</packages>
-</library>
-<library name="wirepad">
-<description>&lt;b&gt;Single Pads&lt;/b&gt;&lt;p&gt;
-&lt;author&gt;Created by librarian@cadsoft.de&lt;/author&gt;</description>
-<packages>
-<package name="2,15/1,0">
-<description>&lt;b&gt;THROUGH-HOLE PAD&lt;/b&gt;</description>
-<wire x1="1.143" y1="-1.143" x2="1.143" y2="-0.635" width="0.1524" layer="21"/>
-<wire x1="1.143" y1="-1.143" x2="0.635" y2="-1.143" width="0.1524" layer="21"/>
-<wire x1="1.143" y1="0.635" x2="1.143" y2="1.143" width="0.1524" layer="21"/>
-<wire x1="1.143" y1="1.143" x2="0.635" y2="1.143" width="0.1524" layer="21"/>
-<wire x1="-0.635" y1="1.143" x2="-1.143" y2="1.143" width="0.1524" layer="21"/>
-<wire x1="-1.143" y1="1.143" x2="-1.143" y2="0.635" width="0.1524" layer="21"/>
-<wire x1="-1.143" y1="-0.635" x2="-1.143" y2="-1.143" width="0.1524" layer="21"/>
-<wire x1="-1.143" y1="-1.143" x2="-0.635" y2="-1.143" width="0.1524" layer="21"/>
-<circle x="0" y="0" radius="1.016" width="0.1524" layer="51"/>
-<pad name="1" x="0" y="0" drill="1.016" diameter="2.159" shape="octagon"/>
-<text x="-1.143" y="1.397" size="1.27" layer="25" ratio="10">&gt;NAME</text>
-<text x="0" y="1" size="0.0254" layer="27">&gt;VALUE</text>
 </package>
 </packages>
 </library>
@@ -244,6 +225,28 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <rectangle x1="9.906" y1="-0.254" x2="10.414" y2="0.254" layer="51"/>
 <rectangle x1="7.366" y1="-0.254" x2="7.874" y2="0.254" layer="51"/>
 <rectangle x1="4.826" y1="-0.254" x2="5.334" y2="0.254" layer="51"/>
+<rectangle x1="2.286" y1="-0.254" x2="2.794" y2="0.254" layer="51"/>
+<rectangle x1="-0.254" y1="-0.254" x2="0.254" y2="0.254" layer="51"/>
+</package>
+<package name="1X02">
+<wire x1="-0.635" y1="1.27" x2="0.635" y2="1.27" width="0.2032" layer="21"/>
+<wire x1="0.635" y1="1.27" x2="1.27" y2="0.635" width="0.2032" layer="21"/>
+<wire x1="1.27" y1="-0.635" x2="0.635" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="1.27" y1="0.635" x2="1.905" y2="1.27" width="0.2032" layer="21"/>
+<wire x1="1.905" y1="1.27" x2="3.175" y2="1.27" width="0.2032" layer="21"/>
+<wire x1="3.175" y1="1.27" x2="3.81" y2="0.635" width="0.2032" layer="21"/>
+<wire x1="3.81" y1="-0.635" x2="3.175" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="3.175" y1="-1.27" x2="1.905" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="1.905" y1="-1.27" x2="1.27" y2="-0.635" width="0.2032" layer="21"/>
+<wire x1="-1.27" y1="0.635" x2="-1.27" y2="-0.635" width="0.2032" layer="21"/>
+<wire x1="-0.635" y1="1.27" x2="-1.27" y2="0.635" width="0.2032" layer="21"/>
+<wire x1="-1.27" y1="-0.635" x2="-0.635" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="0.635" y1="-1.27" x2="-0.635" y2="-1.27" width="0.2032" layer="21"/>
+<wire x1="3.81" y1="0.635" x2="3.81" y2="-0.635" width="0.2032" layer="21"/>
+<pad name="1" x="0" y="0" drill="1.016" diameter="1.8796" rot="R90"/>
+<pad name="2" x="2.54" y="0" drill="1.016" diameter="1.8796" rot="R90"/>
+<text x="-1.3462" y="1.8288" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="-1.27" y="-3.175" size="1.27" layer="27">&gt;VALUE</text>
 <rectangle x1="2.286" y1="-0.254" x2="2.794" y2="0.254" layer="51"/>
 <rectangle x1="-0.254" y1="-0.254" x2="0.254" y2="0.254" layer="51"/>
 </package>
@@ -440,16 +443,9 @@ design rules under a new name.</description>
 </autorouter>
 <elements>
 <element name="USB1" library="my_try" package="48405-0003MYVERSION" value="48405-0003" x="16.51" y="16.51"/>
-<element name="LZR_SIG" library="wirepad" package="2,15/1,0" value="WIREPAD2,15/1,0" x="5.08" y="31.75" smashed="yes" rot="R90">
-<attribute name="NAME" x="2.667" y="33.147" size="1.27" layer="25" ratio="10"/>
-<attribute name="VALUE" x="4.08" y="30.48" size="0.0254" layer="27" rot="R90"/>
-</element>
-<element name="GND" library="wirepad" package="2,15/1,0" value="WIREPAD2,15/1,0" x="13.97" y="31.75" smashed="yes" rot="R90">
-<attribute name="NAME" x="12.827" y="33.147" size="1.27" layer="25" ratio="10"/>
-<attribute name="VALUE" x="12.97" y="31.75" size="0.0254" layer="27" rot="R90"/>
-</element>
 <element name="SR_IN" library="SparkFun-Connectors" package="1X05" value="" x="3.81" y="26.67"/>
 <element name="SR_OUT" library="SparkFun-Connectors" package="1X05" value="" x="3.81" y="21.59"/>
+<element name="LAZER" library="SparkFun-Connectors" package="1X02" value="" x="11.43" y="33.02" rot="R180"/>
 </elements>
 <signals>
 <signal name="VCC">
@@ -473,7 +469,6 @@ design rules under a new name.</description>
 </signal>
 <signal name="GND">
 <contactref element="USB1" pad="GND"/>
-<contactref element="GND" pad="1"/>
 <polygon width="0.4064" layer="16">
 <vertex x="20.32" y="35.56"/>
 <vertex x="-1.27" y="35.56"/>
@@ -489,6 +484,8 @@ design rules under a new name.</description>
 <contactref element="SR_IN" pad="5"/>
 <contactref element="SR_OUT" pad="5"/>
 <via x="8.89" y="11.43" extent="1-16" drill="0.6"/>
+<contactref element="LAZER" pad="1"/>
+<via x="2.54" y="31.75" extent="1-16" drill="0.6" shape="square"/>
 </signal>
 <signal name="RCLK_OUT">
 <contactref element="USB1" pad="D+"/>
@@ -534,19 +531,16 @@ design rules under a new name.</description>
 </signal>
 <signal name="LZR_SIG">
 <contactref element="USB1" pad="GND_DRAIN"/>
-<contactref element="LZR_SIG" pad="1"/>
-<wire x1="9.2456" y1="16.3576" x2="9.2456" y2="15.2908" width="0.4064" layer="1"/>
-<wire x1="8.89" y1="16.7132" x2="9.2456" y2="16.3576" width="0.4064" layer="1"/>
-<wire x1="8.89" y1="17.0688" x2="8.89" y2="16.7132" width="0.4064" layer="1"/>
-<wire x1="9.6012" y1="17.78" x2="8.89" y2="17.0688" width="0.4064" layer="1"/>
-<wire x1="14.224" y1="17.78" x2="9.6012" y2="17.78" width="0.4064" layer="1"/>
-<wire x1="17.0688" y1="20.6248" x2="14.224" y2="17.78" width="0.4064" layer="1"/>
-<wire x1="17.0688" y1="26.67" x2="17.0688" y2="20.6248" width="0.4064" layer="1"/>
-<wire x1="14.5796" y1="29.1592" x2="17.0688" y2="26.67" width="0.4064" layer="1"/>
-<wire x1="7.4676" y1="29.1592" x2="14.5796" y2="29.1592" width="0.4064" layer="1"/>
-<wire x1="4.9784" y1="31.6484" x2="7.4676" y2="29.1592" width="0.4064" layer="1"/>
-<wire x1="9.2456" y1="15.2908" x2="9.4" y2="15.24" width="0.4064" layer="1"/>
-<wire x1="4.9784" y1="31.6484" x2="5.08" y2="31.75" width="0.4064" layer="1"/>
+<contactref element="LAZER" pad="2"/>
+<wire x1="9.525" y1="16.1925" x2="9.525" y2="15.24" width="0.4064" layer="1"/>
+<wire x1="11.1125" y1="17.78" x2="9.525" y2="16.1925" width="0.4064" layer="1"/>
+<wire x1="17.4625" y1="17.78" x2="11.1125" y2="17.78" width="0.4064" layer="1"/>
+<wire x1="17.4625" y1="25.4" x2="17.4625" y2="17.78" width="0.4064" layer="16"/>
+<wire x1="11.43" y1="31.4325" x2="17.4625" y2="25.4" width="0.4064" layer="16"/>
+<wire x1="10.4775" y1="31.4325" x2="11.43" y2="31.4325" width="0.4064" layer="16"/>
+<wire x1="8.89" y1="33.02" x2="10.4775" y2="31.4325" width="0.4064" layer="16"/>
+<wire x1="9.525" y1="15.24" x2="9.4" y2="15.24" width="0.4064" layer="1"/>
+<via x="17.4625" y="17.78" extent="1-16" drill="0.6096"/>
 </signal>
 <signal name="RCLK_IN">
 <contactref element="USB1" pad="D-"/>

@@ -5464,12 +5464,6 @@ thin small outline package</description>
 <label x="144.78" y="33.02" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="N$28" class="0">
-<segment>
-<pinref part="T1" gate="G$1" pin="7"/>
-<wire x1="-12.7" y1="58.42" x2="-20.32" y2="58.42" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="MEMCS" class="0">
 <segment>
 <pinref part="T1" gate="G$1" pin="8"/>
@@ -5600,11 +5594,6 @@ thin small outline package</description>
 </net>
 <net name="IRLED" class="0">
 <segment>
-<pinref part="T1" gate="G$1" pin="5"/>
-<wire x1="-12.7" y1="53.34" x2="-20.32" y2="53.34" width="0.1524" layer="91"/>
-<label x="-17.78" y="53.34" size="1.778" layer="95"/>
-</segment>
-<segment>
 <pinref part="USB2" gate="G$1" pin="GND_DRAIN"/>
 <wire x1="144.78" y1="63.5" x2="162.56" y2="63.5" width="0.1524" layer="91"/>
 <label x="144.78" y="63.5" size="1.778" layer="95"/>
@@ -5613,6 +5602,11 @@ thin small outline package</description>
 <pinref part="USB1" gate="G$1" pin="GND_DRAIN"/>
 <wire x1="144.78" y1="30.48" x2="162.56" y2="30.48" width="0.1524" layer="91"/>
 <label x="144.78" y="30.48" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="T1" gate="G$1" pin="7"/>
+<wire x1="-12.7" y1="58.42" x2="-20.32" y2="58.42" width="0.1524" layer="91"/>
+<label x="-17.78" y="58.42" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="DATA_OUT_2" class="0">
@@ -5656,7 +5650,7 @@ thin small outline package</description>
 <label x="99.06" y="53.34" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="IRSIG" class="0">
+<net name="IRSENSE" class="0">
 <segment>
 <pinref part="SHOULDER1" gate="G$1" pin="1"/>
 <wire x1="124.46" y1="10.16" x2="101.6" y2="10.16" width="0.1524" layer="91"/>
@@ -5700,6 +5694,12 @@ thin small outline package</description>
 <pinref part="SR1" gate="A" pin="QA"/>
 <wire x1="76.2" y1="10.16" x2="68.58" y2="10.16" width="0.1524" layer="91"/>
 <label x="71.12" y="10.16" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="N$5" class="0">
+<segment>
+<pinref part="T1" gate="G$1" pin="5"/>
+<wire x1="-12.7" y1="53.34" x2="-20.32" y2="53.34" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
