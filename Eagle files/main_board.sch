@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.5.0">
+<eagle version="7.4.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -4631,9 +4631,9 @@ Basic schematic elements and footprints for 0603, 1206, and PTH resistors.</desc
 <pad name="VCC" x="-10.61" y="-2.77" drill="0.8"/>
 <hole x="-13.68" y="-4.77" drill="2.4"/>
 <hole x="-0.54" y="-4.77" drill="2.4"/>
-<wire x1="-15.61" y1="1.23" x2="-15.61" y2="-16.27" width="0.127" layer="21"/>
-<wire x1="-15.61" y1="-16.27" x2="1.39" y2="-16.27" width="0.127" layer="21"/>
-<wire x1="1.39" y1="-16.27" x2="1.39" y2="1.23" width="0.127" layer="21"/>
+<wire x1="-15.61" y1="1.23" x2="-15.61" y2="-7.38" width="0.127" layer="21"/>
+<wire x1="-15.61" y1="-7.38" x2="1.39" y2="-7.38" width="0.127" layer="21"/>
+<wire x1="1.39" y1="-7.38" x2="1.39" y2="1.23" width="0.127" layer="21"/>
 <wire x1="1.39" y1="1.23" x2="-15.61" y2="1.23" width="0.127" layer="21"/>
 <text x="-15.24" y="1.27" size="1.27" layer="21">&gt;NAME</text>
 </package>
