@@ -12,27 +12,37 @@ D -
 E - 
 F - Base
 
-Second Byte - Function (of pulse)
-
-0 - Set up
-1 - Damage
-2 - Refill
+Second Byte - Team 2 
+If first byte is 0, this is the team to set the tagger to
+If otherwise this byte should match the first byte
 
 Third Byte - Amount
 
-If second byte is
+If first byte is
 0 - Max Health
 1 - Damage of "laser"
 2 - Health to refill
 
 Fourth Byte - Amount
-If second byte is
+If first byte is
 0 - Max Ammo
 1 - Extra damage (if used)
 2 - Ammo to refill
 
-Fifth -Eighth Byte - ID
+Fifth Byte - Respawns
+If first byte is 0, this is the number of respawns the player gets
+This may not be implemented in this version.
+
+Sixth Byte - Reloads
+If first byte is 0, this is the number of reloads the player gets
+This may not be implemented in this version
+
+Seventh Byte - Damage
+If first byte is 0, this is the amount of damage the tagger does
+This may not be implemented in this version
+
+Eighth Byte - ID
 ID Number
-If bytes 1 and 2 are 0, it sets the ID of the tagger
+If byte 1 is 0, it sets the ID of the tagger
 
 Checks will be in place to make sure only the admin tool can send first and second byte as 0
