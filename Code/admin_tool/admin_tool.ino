@@ -85,7 +85,7 @@ void setup() {
   irrecv.enableIRIn();
 
   //blinks led with IRLED for visual feedback
-  irrecv.blink13(true);
+  //irrecv.blink13(true);
 
 }
 
