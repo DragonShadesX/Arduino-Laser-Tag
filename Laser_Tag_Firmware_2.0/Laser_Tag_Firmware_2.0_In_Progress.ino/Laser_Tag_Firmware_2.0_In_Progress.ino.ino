@@ -41,7 +41,7 @@ boolean playerDead = false;
 int count = 0;
 bool receivedPulse = true;
 unsigned long value = 31723855; //Remove - For test purposes only
-
+unsigned long sendPacket;
 
 // stats
 int fireDelay = 100;
@@ -163,6 +163,8 @@ void baseRefill(){
 }
 
 void shoot(){
+  irsend.sendRC6(sendPacket, 32);
+  irrecv.enableIRIn();
   ammo--;
   playSound("reload");
   lastReload = millis();
@@ -209,6 +211,18 @@ void configureTagger(){
     reloads  =  hex_decoder(packetA[5]);
     damage   =  hex_decoder(packetA[6]);
     ID       =  packetA[7];
+
+    //*********************Create the Custom Packet for this Tagger*********************
+
+    byte teamEncoded     = constrain(team, 0x0, 0xf);
+    byte hpEncoded       = constrain(hp, 0x0, 0xf);
+    byte ammoEncoded     = constrain(ammo, 0x0, 0xf);
+    byte respawnsEncoded = constrain(respawns, 0x0, 0xf);
+    byte reloadsEncoded  = constrain(reloads, 0x0, 0xf);
+    byte damageEncoded   = constrain(damage, 0x0, 0xf);
+    byte IDEncoded       = constrain(ID, 0x0, 0xf);
+    
+    sendPacket = ((teamEncoded << 28) | (teamEncoded << 24) | (hpEncoded << 20) | (ammoEncoded << 16) | (respawnsEncoded << 12) | (reloadsEncoded << 8) | (damageEncoded << 4) | IDEncoded);    
 }
 
 
@@ -256,6 +270,11 @@ void longToArray(unsigned long packet){
   packetA[1] = ((packet >> 24) & 0xF);
   packetA[0] = ((packet >> 28) & 0xF);
 }
+
+unsigned long createPacket(){ //Creates the packet that the tagger will send
+
+}
+
 
 long hex_decoder(byte inc_hex){
    switch(inc_hex){
