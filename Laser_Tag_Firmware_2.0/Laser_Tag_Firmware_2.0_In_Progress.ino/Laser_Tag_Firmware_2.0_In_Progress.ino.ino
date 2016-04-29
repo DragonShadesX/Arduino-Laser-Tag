@@ -40,7 +40,7 @@ byte amount   = 0x0;
 boolean playerDead = false;
 int count = 0;
 bool receivedPulse = true;
-unsigned long value = 31723855; //Remove - For test purposes only
+unsigned long value = 38076239; //Remove - For test purposes only
 unsigned long sendPacket;
 
 // stats
@@ -214,15 +214,15 @@ void configureTagger(){
 
     //*********************Create the Custom Packet for this Tagger*********************
 
-    byte teamEncoded     = constrain(team, 0x0, 0xf);
-    byte hpEncoded       = constrain(hp, 0x0, 0xf);
-    byte ammoEncoded     = constrain(ammo, 0x0, 0xf);
-    byte respawnsEncoded = constrain(respawns, 0x0, 0xf);
-    byte reloadsEncoded  = constrain(reloads, 0x0, 0xf);
-    byte damageEncoded   = constrain(damage, 0x0, 0xf);
-    byte IDEncoded       = constrain(ID, 0x0, 0xf);
+    byte teamEncoded     = constrain(packetA[1], 0x0, 0xf);
+    byte hpEncoded       = constrain(packetA[2], 0x0, 0xf);
+    byte ammoEncoded     = constrain(packetA[3], 0x0, 0xf);
+    byte respawnsEncoded = constrain(packetA[4], 0x0, 0xf);
+    byte reloadsEncoded  = constrain(packetA[5], 0x0, 0xf);
+    byte damageEncoded   = constrain(packetA[6], 0x0, 0xf);
+    byte IDEncoded       = constrain(packetA[7], 0x0, 0xf);
     
-    sendPacket = ((teamEncoded << 28) | (teamEncoded << 24) | (hpEncoded << 20) | (ammoEncoded << 16) | (respawnsEncoded << 12) | (reloadsEncoded << 8) | (damageEncoded << 4) | IDEncoded);    
+    sendPacket = (((unsigned long)((value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((value>>24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF));  
 }
 
 
@@ -376,6 +376,10 @@ void printVars(){
 
   Serial.print("Dead: ");
   Serial.print(playerDead);
+  Serial.println(" ");
+
+  Serial.print("sendPacket: ");
+  Serial.print(sendPacket);
   Serial.println(" ");
 }
 
