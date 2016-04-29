@@ -6,6 +6,7 @@
  * 
  * Notes:
  * Decoding: DO NOT DECODE THE FIRST TWO BYTES OR THE LAST ONE. These contain team number and ID and should remain as 0-15. 
+ * On a side note: Camel Case Rocks.
  */
 
 #include <IRremote.h>
@@ -37,14 +38,12 @@ byte damage   = 0x0;
 byte ID       = 0x0;
 byte amount   = 0x0;
 
-boolean playerDead = false;
-int count = 0;
-bool receivedPulse = true;
-unsigned long value = 38076239; //Remove - For test purposes only
-unsigned long sendPacket;
+unsigned long sendPacket; //This is what the tagger shoots
 
 // stats
 int fireDelay = 100;
+bool playerDead = false;
+bool receivedPulse = true;
 
 // timers
 unsigned long lastShoot;
@@ -54,6 +53,15 @@ int reloadTime = 1000;
 bool shootReady = true;
 bool reloadReady = true;
 
+
+/////////////////////////////////
+////FOR DEBUGGING AND TESTING////
+/////////////////////////////////
+  unsigned long value = 38076239; //Simulates the "value" variable that IRRecv returns after decoding the received packet
+  int count = 0;
+/////////////////////////////////
+
+  
 void setup(){
   Serial.begin(9600);
 
@@ -80,16 +88,19 @@ void loop(){
 //*********************************Hit by admin tool
   if(receivedPulse && packetA[0] == 0){
     configureTagger();
+    updateDisplays();
   }
 
 //*********************************Hit by non-friendly, non-base
   if(receivedPulse && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team){ //Byte 0 is between 1 and 14 indicating a team
     hit();
+    updateDisplays();
   }
 
 //*********************************Hit by base
   if(receivedPulse && packetA[1] == 15 && packetA[0] == team){ //Received packet from a friendly base station
     baseRefill();
+    updateDisplays();
   }
 
 //*********************************(Prevents user from spamming)
@@ -105,11 +116,13 @@ void loop(){
 //*********************************Trigger Pressed
   if(digitalRead(triggerPin) && !playerDead && ammo != 0 && reloadReady && shootReady){ //Fire only if the player is alive and has ammo and is ready to shoot
     shoot();
+    updateDisplays();
   }
 
 //*********************************Trigger Pressed
   if(digitalRead(reloadPin) && reloadReady && !dead) {
     reload();
+    updateDisplays();
   }
 
 //*********************************Fire Modes
@@ -120,6 +133,10 @@ void loop(){
     receivedPulse = false; //Already evaluated this hit, look for the next.
   }
 
+
+                      //////////////////////
+                      ////For debugging!////
+                      //////////////////////
   updateDisplays();
   count++;
   if(count == 1){
@@ -222,7 +239,7 @@ void configureTagger(){
     byte damageEncoded   = constrain(packetA[6], 0x0, 0xf);
     byte IDEncoded       = constrain(packetA[7], 0x0, 0xf);
     
-    sendPacket = (((unsigned long)((value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((value>>24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF));  
+    sendPacket = (((unsigned long)((value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((value>>24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF)); //PEW PEW PEW!!
 }
 
 
@@ -270,11 +287,6 @@ void longToArray(unsigned long packet){
   packetA[1] = ((packet >> 24) & 0xF);
   packetA[0] = ((packet >> 28) & 0xF);
 }
-
-unsigned long createPacket(){ //Creates the packet that the tagger will send
-
-}
-
 
 long hex_decoder(byte inc_hex){
    switch(inc_hex){
