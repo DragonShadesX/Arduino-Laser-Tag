@@ -66,7 +66,7 @@ char health_display_type = 'b';
 int health_display_number = 1;
 char ammo_display_type = 'b';
 int ammo_display_number = 1;
-boolean team_color[3] = {false, false, false};
+bool team_color[3] = {false, false, false};
 
 // for formatting display info to shift registers
 byte low_hp[9] = {0x00000000, 0x00000001, 0x00000011, 0x00000111, 0x00001111, 0x00011111, 0x00111111, 0x01111111, 0x11111111};
@@ -85,13 +85,10 @@ byte fifth_out;
 /////////////////////////////////
 ////FOR DEBUGGING AND TESTING////
 /////////////////////////////////
-<<<<<<< HEAD
+ 
 unsigned long value = 38076239; //Simulates the "value" variable that IRRecv returns after decoding the received packet
 int count = 0;
-=======
-  unsigned long value = 223343103; //Simulates the "value" variable that IRRecv returns after decoding the received packet
-  int count = 0;
->>>>>>> origin/master
+  
 /////////////////////////////////
 
 
@@ -122,21 +119,19 @@ void loop() {
   //  }
 
   //Hit by admin tool
-<<<<<<< HEAD
-  if (received_pulse && packetA[0] == 0) {
-=======
+
   if(received_pulse && packetA[0] == 0){
     Serial.println("Configuring tagger");
->>>>>>> origin/master
+  
     configure_tagger();
     received_pulse = false;
   }
 
-<<<<<<< HEAD
+ 
   //Hit by non-friendly, non-base
   if (received_pulse && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team) { //Byte 0 is between 1 and 14 indicating a team
-    hit();
-=======
+    hit(false);
+  }
   //Compatibility 
   if(received_pulse && compatibility_enabled && (value == 1067460051 || value == 2800112845 || value == 2031644225 || value == 2159483741)){ //ffa, t1, t2, t3
     
@@ -153,7 +148,7 @@ void loop() {
   //Not playing FFA, Hit by non-friendly, non-base
   if(received_pulse && !compatibility_enabled && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team && team != 9){ //Byte 0 is between 1 and 14 indicating a team
     hit(false);
->>>>>>> origin/master
+  
   }
 
   //Playing FFA, hit by player playing FFA
@@ -187,12 +182,12 @@ void loop() {
     reload();
   }
 
-<<<<<<< HEAD
+ 
   //Fire Modes
 
 
-=======
->>>>>>> origin/master
+  
+  
   //Reset received_pulse status
   if (received_pulse) {
     received_pulse = false; //Already evaluated this hit, look for the next.
@@ -202,7 +197,7 @@ void loop() {
   ////For debugging!////
   //////////////////////
   count++;
-<<<<<<< HEAD
+ 
   if (count == 1) {
     value = 575668223; //224FFFFF Shot by Team 2 player, -10hp
     received_pulse = true;
@@ -213,7 +208,7 @@ void loop() {
   }
   else if (count == 3) {
     value = 1609564159; //5FEFFFFF Shot by team 5 player, -100hp
-=======
+  }
   if(count == 1){
     value = 2031644225; //LTX T2
     received_pulse = true;
@@ -224,7 +219,7 @@ void loop() {
   }
   else if(count == 3) {
     value = 2571435855; //FFA Player
->>>>>>> origin/master
+  
     received_pulse = true;
   }
   else if (count == 4) {
@@ -240,11 +235,6 @@ void loop() {
 ///////////////////////////
 
 
-<<<<<<< HEAD
-void hit() {
-  Serial.println("Got hit");
-  if (hp < hex_decoder(packetA[2])) {
-=======
 void hit(bool compatibility){
   Serial.println(" ");
   Serial.println("Got hit");
@@ -254,21 +244,19 @@ void hit(bool compatibility){
   }else if(compatibility && (hp > 1)){
     hp--;
   }else if(!compatibility && (hp < hex_decoder(packetA[2]))){
->>>>>>> origin/master
+  
     hp = 0;
   }else if(!compatibility && (hp > hex_decoder(packetA[2]))){
     hp = hp - hex_decoder(packetA[2]);
   }
-<<<<<<< HEAD
+ 
   else {
     hp = hp - hex_decoder(packetA[2]); //Took a hit
   }
-  if (hp <= 0) {
-=======
 
   if(hp <= 0){
     Serial.println(" ");
->>>>>>> origin/master
+  
     Serial.println("Dead!");
     Serial.println(" ");
     dead();
@@ -277,13 +265,10 @@ void hit(bool compatibility){
   update_displays(hp, ammo, team);
 }
 
-<<<<<<< HEAD
-void baseRefill() {
-  hp = hp - hex_decoder(packetA[3]);
-=======
+ 
 void baseRefill(){
   hp = hp + hex_decoder(packetA[3]);
->>>>>>> origin/master
+  
   ammo = ammo + hex_decoder(packetA[4]);
   play_sound("refill");
   update_displays(hp, ammo, team);
@@ -331,12 +316,9 @@ void dead() {
     play_sound("dead");
     //update_displays(0, 0, team);
   }
-<<<<<<< HEAD
-  else {
-=======
+ 
   else{
     Serial.println(" ");
->>>>>>> origin/master
     Serial.println("Respawning!");
     Serial.println(" ");
     respawns--; //Respawns are not yet 0, player is still alive.
@@ -347,32 +329,8 @@ void dead() {
 }
 
 //Sets all the variables to those given by the admin tool
-<<<<<<< HEAD
-void configure_tagger() {
-  team     =  packetA[1];
-  hp       =  hex_decoder(packetA[2]);
-  max_ammo =  hex_decoder(packetA[3]);
-  ammo     =  hex_decoder(packetA[3]); //Reload the tagger
-  respawns =  hex_decoder(packetA[4]);
-  reloads  =  hex_decoder(packetA[5]);
-  damage   =  hex_decoder(packetA[6]);
-  ID       =  packetA[7];
+ 
 
-  update_displays(hp, ammo, team);
-
-  //*********************Create the Custom Packet for this Tagger*********************
-
-  byte teamEncoded     = constrain(packetA[1], 0x0, 0xf);
-  byte hpEncoded       = constrain(packetA[2], 0x0, 0xf);
-  byte ammoEncoded     = constrain(packetA[3], 0x0, 0xf);
-  byte respawnsEncoded = constrain(packetA[4], 0x0, 0xf);
-  byte reloadsEncoded  = constrain(packetA[5], 0x0, 0xf);
-  byte damageEncoded   = constrain(packetA[6], 0x0, 0xf);
-  byte IDEncoded       = constrain(packetA[7], 0x0, 0xf);
-
-  sendPacket = (((unsigned long)((value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((value >> 24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF)); //PEW PEW PEW!!
-
-=======
 void configure_tagger(){
     
     //Check if receiving LTX configuration
@@ -432,7 +390,7 @@ void configure_tagger(){
       sendPacket = (value & 0x0FFFFFFF) | team << 28;
     }
     update_displays(hp, ammo, team);
->>>>>>> origin/master
+  
 }
 
 
@@ -557,118 +515,71 @@ void longToArray(unsigned long packet) {
   packetA[0] = ((packet >> 28) & 0xF);
 }
 
-<<<<<<< HEAD
-long hex_decoder(byte inc_hex) {
-  switch (inc_hex) {
-    case 0:
-      return                0;
-      break;
-    case 1:
-      return                1;
-      break;
-    case 2:
-      return                3;
-      break;
-    case 3:
-      return                5;
-      break;
-    case 4:
-      return               10;
-      break;
-    case 5:
-      return               20;
-      break;
-    case 6:
-      return               25;
-      break;
-    case 7:
-      return               30;
-      break;
-    case 8:
-      return               40;
-      break;
-    case 9:
-      return               50;
-      break;
-    case 10:
-      return               60;
-      break;
-    case 11:
-      return               70;
-      break;
-    case 12:
-      return               80;
-      break;
-    case 13:
-      return               90;
-      break;
-    case 14:
-      return              100;
-      break;
-    case 15:
-      return              255;
-      break;
-    default:
-      return                33;
-      break;
-  }
-}
+ 
 
 void team_color_decoder(byte i_team) {
   switch (i_team) {
     case 0:                             //Admin Tagger: White
-      team_color = (true, true, true);
+      color_assigner(true, true, true);
       break;
     case 1:                             //Team 1: Red
-      team_color = (true, false, false);
+      color_assigner(true, false, false);
       break;
     case 2:                             //Team 2: Green
-      team_color = (false, true, false);
+      color_assigner(false, true, false);
       break;
     case 3:                             //Team 3: Blue
-      team_color = (false, false, true);
+      color_assigner(false, false, true);
       break;
     case 4:                             //Team 4: Yellow
-      team_color = (true, true, false);
+      color_assigner(true, true, false);
       break;
     case 5:                             //Team 5: Magenta
-      team_color = (true, false, true);
+      color_assigner(true, false, true);
       break;
     case 6:                             //Team 6: Cyan
-      team_color = (false, true, true);
+      color_assigner(false, true, true);
       break;
     case 7:                             //Team 7: White
-      team_color = (true, true, true);
+      color_assigner(true, true, true);
       break;
     case 8:                             //Team 8: Red (repeat :/)
-      team_color = (true, false, false);
+      color_assigner(true, false, false);
       break;
     case 9:                             //Free for All: White
-      team_color = (true, true, true);
+      color_assigner(true, true, true);
       break;
     case 10:                            //Human: Blue
-      team_color = (false, false, true);
+      color_assigner(false, false, true);
       break;
     case 11:                             //Infected: Green
-      team_color = (false, true, false);
+      color_assigner(false, true, false);
       break;
     case 12:                             //Phoenix Free for All: White
-      team_color = (true, true, true);
+      color_assigner(true, true, true);
       break;
     case 13:                             //Phoenix Team 1: Red
-      team_color = (true, false, false);
+      color_assigner(true, false, false);
       break;
     case 14:                             //Phoenix Team 2: Green
-      team_color = (false, true, false);
+      color_assigner(false, true, false);
       break;
     case 15:                             //Phoenix Team 3: Blue
-      team_color = (false, false, true);
+      color_assigner(false, false, true);
       break;
     default:                             //Turn off if failed :/
-      team_color = (false, false, false);
+      color_assigner(false, false, false);
       break;
+  
   }
-=======
+}
+
+void color_assigner(bool first, bool second, bool third){
+  team_color[0] = first;
+  team_color[1] = second;
+  team_color[2] = third;
+}
+
 long hex_decoder(byte inc_hex){
    switch(inc_hex){
      case 0:
@@ -723,7 +634,7 @@ long hex_decoder(byte inc_hex){
        return                0;
        break;
    }
->>>>>>> origin/master
+  
 }
 
 /////////////////
@@ -732,12 +643,10 @@ long hex_decoder(byte inc_hex){
 
 
 //For debugging purposes
-<<<<<<< HEAD
-void print_vars() {
-=======
+
 void print_vars(){
   Serial.println(" ");
->>>>>>> origin/master
+  
   Serial.print("Team - Stored: ");
   Serial.print(team);
   Serial.print(" Received: ");
