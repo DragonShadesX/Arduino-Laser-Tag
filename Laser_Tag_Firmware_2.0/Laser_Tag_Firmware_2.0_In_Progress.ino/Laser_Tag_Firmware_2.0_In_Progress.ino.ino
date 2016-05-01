@@ -1,12 +1,12 @@
 /*
- * LazerTag Main Functions
- * Version 1.0
- * Authors: Alan Fernandez, Greg Tighe, Jake Hawes
- * Last Edited: 30/4/16
- * 
- * Notes:
- * Decoding: DO NOT DECODE THE FIRST TWO BYTES OR THE LAST ONE. These contain team number and ID and should remain as 0-15. 
- */
+   LazerTag Main Functions
+   Version 1.0
+   Authors: Alan Fernandez, Greg Tighe, Jake Hawes
+   Last Edited: 1/5/16
+
+   Notes:
+   Decoding: DO NOT DECODE THE FIRST TWO BYTES OR THE LAST ONE. These contain team number and ID and should remain as 0-15.
+*/
 
 #include <IRremote.h>
 
@@ -65,10 +65,11 @@ char health_display_type = 'b';
 int health_display_number = 1;
 char ammo_display_type = 'b';
 int ammo_display_number = 1;
+boolean team_color[3] = {false, false, false};
 
 // for formatting display info to shift registers
 byte low_hp[9] = {0x00000000, 0x00000001, 0x00000011, 0x00000111, 0x00001111, 0x00011111, 0x00111111, 0x01111111, 0x11111111};
-byte high_hp[3]= {0x00000000, 0x00000001, 0x00000011};
+byte high_hp[3] = {0x00000000, 0x00000001, 0x00000011};
 byte low_ammo[9] = {0x00000000, 0x00000001, 0x00000011, 0x00000111, 0x00001111, 0x00011111, 0x00111111, 0x01111111, 0x11111111};
 byte high_ammo[3] = {0x00000000, 0x00000001, 0x00000011};
 byte red_byte = 0x001000000;
@@ -83,13 +84,13 @@ byte fifth_out;
 /////////////////////////////////
 ////FOR DEBUGGING AND TESTING////
 /////////////////////////////////
-  unsigned long value = 38076239; //Simulates the "value" variable that IRRecv returns after decoding the received packet
-  int count = 0;
+unsigned long value = 38076239; //Simulates the "value" variable that IRRecv returns after decoding the received packet
+int count = 0;
 /////////////////////////////////
 
 
 
-void setup(){
+void setup() {
   Serial.begin(9600);
 
   //Assign pins
@@ -103,29 +104,29 @@ void setup(){
   //update displays? or not until tagged by admin?
 }
 
-void loop(){ 
+void loop() {
   Serial.println("   ");
   longToArray(value);
-  
+
   //Pulse Received
-//  if(irrecv.decode(&results)){
-//    longToArray(value);
-//    irrecv.resume();
-//    received_pulse = true;
-//  }
+  //  if(irrecv.decode(&results)){
+  //    longToArray(value);
+  //    irrecv.resume();
+  //    received_pulse = true;
+  //  }
 
   //Hit by admin tool
-  if(received_pulse && packetA[0] == 0){
+  if (received_pulse && packetA[0] == 0) {
     configure_tagger();
   }
 
   //Hit by non-friendly, non-base
-  if(received_pulse && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team){ //Byte 0 is between 1 and 14 indicating a team
+  if (received_pulse && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team) { //Byte 0 is between 1 and 14 indicating a team
     hit();
   }
 
   //Hit by base
-  if(received_pulse && packetA[1] == 15 && packetA[0] == team){ //Received packet from a friendly base station
+  if (received_pulse && packetA[1] == 15 && packetA[0] == team) { //Received packet from a friendly base station
     baseRefill();
   }
 
@@ -133,44 +134,44 @@ void loop(){
   if (!reload_ready && millis() > last_reload + reload_time) {
     reload_ready = true;
   }
-  
+
   //Prevents spamming shooting
   if (!shoot_ready && millis() > last_shoot + shoot_time) {
     shoot_ready = true;
   }
-  
+
   //Shoot
   //Only if the player is alive and is ready to shoot
-  if(digitalRead(trigger_pin) && !player_dead && reload_ready && shoot_ready){ 
+  if (digitalRead(trigger_pin) && !player_dead && reload_ready && shoot_ready) {
     shoot();
   }
 
   //Reload
-  if(digitalRead(reload_pin) && reload_ready && !dead) {
+  if (digitalRead(reload_pin) && reload_ready && !dead) {
     reload();
   }
 
   //Fire Modes
 
- 
+
   //Reset received_pulse status
-  if(received_pulse){
+  if (received_pulse) {
     received_pulse = false; //Already evaluated this hit, look for the next.
   }
 
-                      //////////////////////
-                      ////For debugging!////
-                      //////////////////////
+  //////////////////////
+  ////For debugging!////
+  //////////////////////
   count++;
-  if(count == 1){
+  if (count == 1) {
     value = 575668223; //224FFFFF Shot by Team 2 player, -10hp
     received_pulse = true;
   }
-  else if(count == 2) {
+  else if (count == 2) {
     value = 1432354815; //555FFFFF Shot by Team 5 player, -20hp
     received_pulse = true;
   }
-  else if(count == 3) {
+  else if (count == 3) {
     value = 1609564159; //5FEFFFFF Shot by team 5 player, -100hp
     received_pulse = true;
   }
@@ -186,15 +187,15 @@ void loop(){
 ///////////////////////////
 
 
-void hit(){
+void hit() {
   Serial.println("Got hit");
-  if(hp < hex_decoder(packetA[2])){
+  if (hp < hex_decoder(packetA[2])) {
     hp = 0;
   }
   else {
     hp = hp - hex_decoder(packetA[2]); //Took a hit
   }
-  if(hp <= 0){
+  if (hp <= 0) {
     Serial.println("Dead!");
     dead();
   }
@@ -202,14 +203,14 @@ void hit(){
   update_displays(hp, ammo, team);
 }
 
-void baseRefill(){
+void baseRefill() {
   hp = hp - hex_decoder(packetA[3]);
   ammo = ammo + hex_decoder(packetA[4]);
   play_sound("refill");
   update_displays(hp, ammo, team);
 }
 
-void shoot(){
+void shoot() {
   if (ammo > 0) {
     irsend.sendRC6(sendPacket, 32);
     irrecv.enableIRIn();
@@ -224,17 +225,15 @@ void shoot(){
   }
 }
 
-// What's going on here? O.o
-// Limiting the total amount of times you can hit the reload button?
-void reload(){
-  if(reloads == 255){
+void reload() {
+  if (reloads == 255) {
     ammo = max_ammo;
     play_sound("reload");
     last_reload = millis();
     reload_ready = false;
     update_displays(hp, ammo, team);
   }
-  else if(reloads != 0){
+  else if (reloads != 0) {
     ammo = max_ammo;
     reloads--;
     play_sound("reload");
@@ -247,13 +246,13 @@ void reload(){
   }
 }
 
-void dead(){ 
-  if(respawns <= 0){ //If respawns are already at 0, the player is now dead
+void dead() {
+  if (respawns <= 0) { //If respawns are already at 0, the player is now dead
     player_dead = true;
     play_sound("dead");
     update_displays(0, 0, team);
   }
-  else{
+  else {
     Serial.println("Respawning!");
     respawns--; //Respawns are not yet 0, player is still alive.
     hp = 100; //Full health again
@@ -268,30 +267,30 @@ void dead(){
 //}
 
 //Sets all the variables to those given by the admin tool
-void configure_tagger(){
-    team     =  packetA[1];
-    hp       =  hex_decoder(packetA[2]);
-    max_ammo =  hex_decoder(packetA[3]);
-    ammo     =  hex_decoder(packetA[3]); //Reload the tagger
-    respawns =  hex_decoder(packetA[4]);
-    reloads  =  hex_decoder(packetA[5]);
-    damage   =  hex_decoder(packetA[6]);
-    ID       =  packetA[7];
-    
-    update_displays(hp, ammo, team);
-    
-    //*********************Create the Custom Packet for this Tagger*********************
+void configure_tagger() {
+  team     =  packetA[1];
+  hp       =  hex_decoder(packetA[2]);
+  max_ammo =  hex_decoder(packetA[3]);
+  ammo     =  hex_decoder(packetA[3]); //Reload the tagger
+  respawns =  hex_decoder(packetA[4]);
+  reloads  =  hex_decoder(packetA[5]);
+  damage   =  hex_decoder(packetA[6]);
+  ID       =  packetA[7];
 
-    byte teamEncoded     = constrain(packetA[1], 0x0, 0xf);
-    byte hpEncoded       = constrain(packetA[2], 0x0, 0xf);
-    byte ammoEncoded     = constrain(packetA[3], 0x0, 0xf);
-    byte respawnsEncoded = constrain(packetA[4], 0x0, 0xf);
-    byte reloadsEncoded  = constrain(packetA[5], 0x0, 0xf);
-    byte damageEncoded   = constrain(packetA[6], 0x0, 0xf);
-    byte IDEncoded       = constrain(packetA[7], 0x0, 0xf);
-    
-    sendPacket = (((unsigned long)((value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((value>>24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF)); //PEW PEW PEW!!
-    
+  update_displays(hp, ammo, team);
+
+  //*********************Create the Custom Packet for this Tagger*********************
+
+  byte teamEncoded     = constrain(packetA[1], 0x0, 0xf);
+  byte hpEncoded       = constrain(packetA[2], 0x0, 0xf);
+  byte ammoEncoded     = constrain(packetA[3], 0x0, 0xf);
+  byte respawnsEncoded = constrain(packetA[4], 0x0, 0xf);
+  byte reloadsEncoded  = constrain(packetA[5], 0x0, 0xf);
+  byte damageEncoded   = constrain(packetA[6], 0x0, 0xf);
+  byte IDEncoded       = constrain(packetA[7], 0x0, 0xf);
+
+  sendPacket = (((unsigned long)((value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((value >> 24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF)); //PEW PEW PEW!!
+
 }
 
 
@@ -300,12 +299,12 @@ void configure_tagger(){
 ////FEEDBACK////
 ////////////////
 
-void update_displays(int d_hp, int d_ammo, byte d_team){
+void update_displays(int d_hp, int d_ammo, byte d_team) {
   // user can add support for 7 segs and other types of displays
   // base code supports 1 bar graph for health and 1 for ammo
 
   digitalWrite(SHIFT_REGISTER_LATCHCLOCK, HIGH);
-  
+
   // update health
   if (health_display_type == 'b') {
     // remap hp to a scale of 10 for bar graph
@@ -313,12 +312,12 @@ void update_displays(int d_hp, int d_ammo, byte d_team){
     byte first_out = high_hp[constrain(d_hp - 8, 0, 2)];
     byte second_out = low_hp[constrain(d_hp, 0, 8)];
   }
-  
+
   else if (health_display_type == '7') {
     // update health with 7 seg
     // dependent on number of displays
   }
-  
+
   // update ammo
   if (ammo_display_type == 'b') {
     // remap ammo to a scale of 10 for bar graph
@@ -332,13 +331,13 @@ void update_displays(int d_hp, int d_ammo, byte d_team){
     // dependent on number of displays
   }
 
-  // update team color  
+  // update team color
   // set up fifth_out
-  // TODO: Switch table to extract color information from team byte
-  boolean red = true;
-  boolean green = true;
-  boolean blue = true;
-  
+  team_color_decoder(d_team);
+  boolean red = team_color[0];
+  boolean green = team_color[1];
+  boolean blue = team_color[2];
+
   if (red) {
     fifth_out = fifth_out | red_byte;
   }
@@ -348,7 +347,7 @@ void update_displays(int d_hp, int d_ammo, byte d_team){
   if (blue) {
     fifth_out = fifth_out | blue_byte;
   }
-  
+
   // send out all data to fill shift registers
   shiftOut(SHIFT_REGISTER_DATA_PIN, SHIFT_REGISTER_CLOCK_PIN, MSBFIRST, first_out);
   shiftOut(SHIFT_REGISTER_DATA_PIN, SHIFT_REGISTER_CLOCK_PIN, MSBFIRST, second_out);
@@ -361,7 +360,7 @@ void update_displays(int d_hp, int d_ammo, byte d_team){
   delayMicroseconds(5);
   digitalWrite(SHIFT_REGISTER_LATCHCLOCK, HIGH);
   delayMicroseconds(5);
-  
+
   print_vars();
 }
 
@@ -380,7 +379,7 @@ void play_sound(String sfx) {
   else if (sfx == "hit") {
     // play hit.wav
   }
-  else if (sfx == "out_of_ammo"){
+  else if (sfx == "out_of_ammo") {
     //play out_of_ammo.wav
   }
   else if (sfx == "out_of_reloads") {
@@ -395,7 +394,7 @@ void play_sound(String sfx) {
   else if (sfx == "dead") {
     //play dead.wav
   }
-  
+
 }
 
 
@@ -405,7 +404,7 @@ void play_sound(String sfx) {
 
 
 //Bit shifting the individual characters into cells in the array
-void longToArray(unsigned long packet){
+void longToArray(unsigned long packet) {
   packetA[7] = (packet & 0xF);
   packetA[6] = ((packet >> 4) & 0xF);
   packetA[5] = ((packet >> 8) & 0xF);
@@ -416,60 +415,116 @@ void longToArray(unsigned long packet){
   packetA[0] = ((packet >> 28) & 0xF);
 }
 
-long hex_decoder(byte inc_hex){
-   switch(inc_hex){
-     case 0:
-       return                0;
-       break;
-     case 1:
-       return                1;
-       break;
-     case 2:
-       return                3;
-       break;
-     case 3:
-       return                5;
-       break;
-     case 4:
-       return               10;
-       break;
-     case 5:
-       return               20;
-       break;
-     case 6:
-       return               25;
-       break;
-     case 7:
-       return               30;
-       break;
-     case 8:
-       return               40;
-       break;
-     case 9:
-       return               50;
-       break;
-     case 10:
-       return               60;
-       break;
-     case 11:
-       return               70;
-       break;
-     case 12:
-       return               80;
-       break;
-     case 13:
-       return               90;
-       break;
-     case 14:
-       return              100;
-       break;
-     case 15:
-       return              255;
-       break;
-     default:
-       return                33;
-       break;
-   }
+long hex_decoder(byte inc_hex) {
+  switch (inc_hex) {
+    case 0:
+      return                0;
+      break;
+    case 1:
+      return                1;
+      break;
+    case 2:
+      return                3;
+      break;
+    case 3:
+      return                5;
+      break;
+    case 4:
+      return               10;
+      break;
+    case 5:
+      return               20;
+      break;
+    case 6:
+      return               25;
+      break;
+    case 7:
+      return               30;
+      break;
+    case 8:
+      return               40;
+      break;
+    case 9:
+      return               50;
+      break;
+    case 10:
+      return               60;
+      break;
+    case 11:
+      return               70;
+      break;
+    case 12:
+      return               80;
+      break;
+    case 13:
+      return               90;
+      break;
+    case 14:
+      return              100;
+      break;
+    case 15:
+      return              255;
+      break;
+    default:
+      return                33;
+      break;
+  }
+}
+
+void team_color_decoder(byte i_team) {
+  switch (i_team) {
+    case 0:                             //Admin Tagger: White
+      team_color = (true, true, true);
+      break;
+    case 1:                             //Team 1: Red
+      team_color = (true, false, false);
+      break;
+    case 2:                             //Team 2: Green
+      team_color = (false, true, false);
+      break;
+    case 3:                             //Team 3: Blue
+      team_color = (false, false, true);
+      break;
+    case 4:                             //Team 4: Yellow
+      team_color = (true, true, false);
+      break;
+    case 5:                             //Team 5: Magenta
+      team_color = (true, false, true);
+      break;
+    case 6:                             //Team 6: Cyan
+      team_color = (false, true, true);
+      break;
+    case 7:                             //Team 7: White
+      team_color = (true, true, true);
+      break;
+    case 8:                             //Team 8: Red (repeat :/)
+      team_color = (true, false, false);
+      break;
+    case 9:                             //Free for All: White
+      team_color = (true, true, true);
+      break;
+    case 10:                            //Human: Blue
+      team_color = (false, false, true);
+      break;
+    case 11:                             //Infected: Green
+      team_color = (false, true, false);
+      break;
+    case 12:                             //Phoenix Free for All: White
+      team_color = (true, true, true);
+      break;
+    case 13:                             //Phoenix Team 1: Red
+      team_color = (true, false, false);
+      break;
+    case 14:                             //Phoenix Team 2: Green
+      team_color = (false, true, false);
+      break;
+    case 15:                             //Phoenix Team 3: Blue
+      team_color = (false, false, true);
+      break;
+    default:                             //Turn off if failed :/
+      team_color = (false, false, false);
+      break;
+  }
 }
 
 /////////////////
@@ -478,37 +533,37 @@ long hex_decoder(byte inc_hex){
 
 
 //For debugging purposes
-void print_vars(){
+void print_vars() {
   Serial.print("Team - Stored: ");
   Serial.print(team);
   Serial.print(" Received: ");
   Serial.println(packetA[1]);
-  
+
   Serial.print("Ammo - Stored: ");
   Serial.print(ammo);
   Serial.print(" Received: ");
   Serial.println(packetA[3]);
-  
+
   Serial.print("HP - Stored: ");
   Serial.print(hp);
   Serial.print(" Received: ");
   Serial.println(packetA[2]);
-  
+
   Serial.print("Reloads - Stored: ");
   Serial.print(reloads);
   Serial.print(" Received: ");
   Serial.println(packetA[5]);
-  
+
   Serial.print("Damage - Stored: ");
   Serial.print(damage);
   Serial.print(" Received: ");
   Serial.println(packetA[6]);
-  
+
   Serial.print("ID - Stored: ");
   Serial.print(ID);
   Serial.print("Received: ");
   Serial.println(packetA[7]);
-  
+
   Serial.print("Respawns - Stored: ");
   Serial.print(respawns);
   Serial.print(" Received: ");
