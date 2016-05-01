@@ -1,15 +1,19 @@
 /*
  * LazerTag Main Functions
  * Version 1.0
- * Authors: Alan Fernandez, Greg Tighe
- * Last Edited: 26/4/16
+ * Authors: Alan Fernandez, Greg Tighe, Jake Hawes
+ * Last Edited: 30/4/16
  * 
  * Notes:
  * Decoding: DO NOT DECODE THE FIRST TWO BYTES OR THE LAST ONE. These contain team number and ID and should remain as 0-15. 
- * On a side note: Camel Case Rocks.
  */
 
 #include <IRremote.h>
+
+// grabbed these from Greg's code; not sure if pin numbers changed
+#define SHIFT_REGISTER_DATA_PIN  0
+#define SHIFT_REGISTER_CLOCK_PIN  2
+#define SHIFT_REGISTER_LATCHCLOCK  1
 
 // IR setup
 int RECV_PIN = 10;
@@ -18,9 +22,9 @@ IRrecv irrecv(RECV_PIN);
 decode_results results;
 
 // pins
-int triggerPin = 1;
-int reloadPin  = 2;
-int lightPin   = 3;
+int trigger_pin = 1;
+int reload_pin  = 2;
+int light_pin   = 3;
 
 //////////////////////////
 // Initialize Variables //
@@ -29,8 +33,9 @@ int lightPin   = 3;
 byte packetA[7];
 byte team     = 0x0;
 byte set_team = 0x0;
+byte max_hp   = 0x0;
 byte hp       = 0x0;
-byte maxAmmo  = 0x0;
+byte max_ammo = 0x0;
 byte ammo     = 0x0;
 byte respawns = 0x0;
 byte reloads  = 0x0;
@@ -41,18 +46,39 @@ byte amount   = 0x0;
 unsigned long sendPacket; //This is what the tagger shoots
 
 // stats
-int fireDelay = 100;
-bool playerDead = false;
-bool receivedPulse = true;
+int fire_delay = 100;
+boolean player_dead = false;
+bool received_pulse = true;
 
 // timers
-unsigned long lastShoot;
-unsigned long lastReload;
-int shootTime = 300;
-int reloadTime = 1000;
-bool shootReady = true;
-bool reloadReady = true;
+unsigned long last_shoot;
+unsigned long last_reload;
+int shoot_time = 300;
+int reload_time = 1000;
+bool shoot_ready = true;
+bool reload_ready = true;
 
+// displays
+// 'b' for bar graph, '7' for 7 segment display
+// designed to be modular; support for other display types can be coded in
+char health_display_type = 'b';
+int health_display_number = 1;
+char ammo_display_type = 'b';
+int ammo_display_number = 1;
+
+// for formatting display info to shift registers
+byte low_hp[9] = {0x00000000, 0x00000001, 0x00000011, 0x00000111, 0x00001111, 0x00011111, 0x00111111, 0x01111111, 0x11111111};
+byte high_hp[3]= {0x00000000, 0x00000001, 0x00000011};
+byte low_ammo[9] = {0x00000000, 0x00000001, 0x00000011, 0x00000111, 0x00001111, 0x00011111, 0x00111111, 0x01111111, 0x11111111};
+byte high_ammo[3] = {0x00000000, 0x00000001, 0x00000011};
+byte red_byte = 0x001000000;
+byte green_byte = 0x01000000;
+byte blue_byte = 0x10000000;
+byte first_out;
+byte second_out;
+byte third_out;
+byte fourth_out;
+byte fifth_out;
 
 /////////////////////////////////
 ////FOR DEBUGGING AND TESTING////
@@ -61,96 +87,96 @@ bool reloadReady = true;
   int count = 0;
 /////////////////////////////////
 
-  
+
+
 void setup(){
   Serial.begin(9600);
 
   //Assign pins
-  pinMode(triggerPin, INPUT);
-  pinMode(reloadPin, INPUT);
-  pinMode(lightPin, OUTPUT);
+  pinMode(trigger_pin, INPUT);
+  pinMode(reload_pin, INPUT);
+  pinMode(light_pin, OUTPUT);
 
   //Enable IR reciver
   irrecv.enableIRIn();
+
+  //update displays? or not until tagged by admin?
 }
 
 void loop(){ 
   Serial.println("   ");
   longToArray(value);
   
-//*********************************Pulse Received
+  //Pulse Received
 //  if(irrecv.decode(&results)){
 //    longToArray(value);
 //    irrecv.resume();
-//    receivedPulse = true;
+//    received_pulse = true;
 //  }
 
-//*********************************Hit by admin tool
-  if(receivedPulse && packetA[0] == 0){
-    configureTagger();
-    updateDisplays();
+  //Hit by admin tool
+  if(received_pulse && packetA[0] == 0){
+    configure_tagger();
   }
 
-//*********************************Hit by non-friendly, non-base
-  if(receivedPulse && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team){ //Byte 0 is between 1 and 14 indicating a team
+  //Hit by non-friendly, non-base
+  if(received_pulse && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team){ //Byte 0 is between 1 and 14 indicating a team
     hit();
-    updateDisplays();
   }
 
-//*********************************Hit by base
-  if(receivedPulse && packetA[1] == 15 && packetA[0] == team){ //Received packet from a friendly base station
+  //Hit by base
+  if(received_pulse && packetA[1] == 15 && packetA[0] == team){ //Received packet from a friendly base station
     baseRefill();
-    updateDisplays();
   }
 
-//*********************************(Prevents user from spamming)
-  if (!reloadReady && millis() > lastReload + reloadTime) {
-    reloadReady = true;
+  //Prevents spamming reload
+  if (!reload_ready && millis() > last_reload + reload_time) {
+    reload_ready = true;
   }
   
-//*********************************Fire Rate
-  if (!shootReady && millis() > lastShoot + shootTime) {
-    shootReady = true;
+  //Prevents spamming shooting
+  if (!shoot_ready && millis() > last_shoot + shoot_time) {
+    shoot_ready = true;
   }
   
-//*********************************Trigger Pressed
-  if(digitalRead(triggerPin) && !playerDead && ammo != 0 && reloadReady && shootReady){ //Fire only if the player is alive and has ammo and is ready to shoot
+  //Shoot
+  //Only if the player is alive and is ready to shoot
+  if(digitalRead(trigger_pin) && !player_dead && reload_ready && shoot_ready){ 
     shoot();
-    updateDisplays();
   }
 
-//*********************************Trigger Pressed
-  if(digitalRead(reloadPin) && reloadReady && !dead) {
+  //Reload
+  if(digitalRead(reload_pin) && reload_ready && !dead) {
     reload();
-    updateDisplays();
   }
 
-//*********************************Fire Modes
+  //Fire Modes
 
  
-//*********************************Reset receivedPulse status
-  if(receivedPulse){
-    receivedPulse = false; //Already evaluated this hit, look for the next.
+  //Reset received_pulse status
+  if(received_pulse){
+    received_pulse = false; //Already evaluated this hit, look for the next.
   }
-
 
                       //////////////////////
                       ////For debugging!////
                       //////////////////////
-  updateDisplays();
   count++;
   if(count == 1){
     value = 575668223; //224FFFFF Shot by Team 2 player, -10hp
-    receivedPulse = true;
-  }else if(count == 2){
+    received_pulse = true;
+  }
+  else if(count == 2) {
     value = 1432354815; //555FFFFF Shot by Team 5 player, -20hp
-    receivedPulse = true;
-  }else if(count == 3){
+    received_pulse = true;
+  }
+  else if(count == 3) {
     value = 1609564159; //5FEFFFFF Shot by team 5 player, -100hp
-    receivedPulse = true;
-  }else{
+    received_pulse = true;
+  }
+  else if (count == 4) {
     value = 1609564159; //5FEFFFFF Shot by team 5 player, -100hp
-    receivedPulse = true;
+    received_pulse = true;
   }
 }
 
@@ -164,52 +190,75 @@ void hit(){
   Serial.println("Got hit");
   if(hp < hex_decoder(packetA[2])){
     hp = 0;
-  }else{
+  }
+  else {
     hp = hp - hex_decoder(packetA[2]); //Took a hit
   }
-  
   if(hp <= 0){
     Serial.println("Dead!");
     dead();
   }
+  play_sound("hit");
+  update_displays(hp, ammo, team);
 }
 
 void baseRefill(){
   hp = hp - hex_decoder(packetA[3]);
   ammo = ammo + hex_decoder(packetA[4]);
+  play_sound("refill");
+  update_displays(hp, ammo, team);
 }
 
 void shoot(){
-  irsend.sendRC6(sendPacket, 32);
-  irrecv.enableIRIn();
-  ammo--;
-  playSound("reload");
-  lastReload = millis();
-  reloadReady = false;
+  if (ammo > 0) {
+    irsend.sendRC6(sendPacket, 32);
+    irrecv.enableIRIn();
+    ammo--;
+    update_displays(hp, ammo, team);
+    play_sound("shoot");
+    last_shoot = millis();
+    shoot_ready = false;
+  }
+  else {
+    play_sound("out_of_ammo");
+  }
 }
 
+// What's going on here? O.o
+// Limiting the total amount of times you can hit the reload button?
 void reload(){
-  if(reloads != 255){
-    ammo = maxAmmo;
-    playSound("reload");
-    lastReload = millis();
-    reloadReady = false;
-  }else if(reloads != 0){
-    ammo = maxAmmo;
+  if(reloads == 255){
+    ammo = max_ammo;
+    play_sound("reload");
+    last_reload = millis();
+    reload_ready = false;
+    update_displays(hp, ammo, team);
+  }
+  else if(reloads != 0){
+    ammo = max_ammo;
     reloads--;
-    playSound("reload");
-    lastReload = millis();
-    reloadReady = false;
+    play_sound("reload");
+    last_reload = millis();
+    reload_ready = false;
+    update_displays(hp, ammo, team);
+  }
+  else {
+    play_sound("out_of_reloads");
   }
 }
 
 void dead(){ 
   if(respawns <= 0){ //If respawns are already at 0, the player is now dead
-    playerDead = true;
-  }else{
+    player_dead = true;
+    play_sound("dead");
+    update_displays(0, 0, team);
+  }
+  else{
     Serial.println("Respawning!");
     respawns--; //Respawns are not yet 0, player is still alive.
     hp = 100; //Full health again
+    update_displays(hp, ammo, team);
+    play_sound("respawn");
   }
 }
 
@@ -219,16 +268,18 @@ void dead(){
 //}
 
 //Sets all the variables to those given by the admin tool
-void configureTagger(){
+void configure_tagger(){
     team     =  packetA[1];
     hp       =  hex_decoder(packetA[2]);
-    maxAmmo  =  hex_decoder(packetA[3]);
-      ammo   =  hex_decoder(packetA[3]); //Reload the tagger
+    max_ammo =  hex_decoder(packetA[3]);
+    ammo     =  hex_decoder(packetA[3]); //Reload the tagger
     respawns =  hex_decoder(packetA[4]);
     reloads  =  hex_decoder(packetA[5]);
     damage   =  hex_decoder(packetA[6]);
     ID       =  packetA[7];
-
+    
+    update_displays(hp, ammo, team);
+    
     //*********************Create the Custom Packet for this Tagger*********************
 
     byte teamEncoded     = constrain(packetA[1], 0x0, 0xf);
@@ -240,6 +291,7 @@ void configureTagger(){
     byte IDEncoded       = constrain(packetA[7], 0x0, 0xf);
     
     sendPacket = (((unsigned long)((value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((value>>24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF)); //PEW PEW PEW!!
+    
 }
 
 
@@ -248,26 +300,102 @@ void configureTagger(){
 ////FEEDBACK////
 ////////////////
 
+void update_displays(int d_hp, int d_ammo, byte d_team){
+  // user can add support for 7 segs and other types of displays
+  // base code supports 1 bar graph for health and 1 for ammo
 
-//Displays the stats (Ammo & Health)
-void updateDisplays(){
-  printVars();
+  digitalWrite(SHIFT_REGISTER_LATCHCLOCK, HIGH);
+  
+  // update health
+  if (health_display_type == 'b') {
+    // remap hp to a scale of 10 for bar graph
+    d_hp = map(d_hp, 0, max_hp, 0, 10);
+    byte first_out = high_hp[constrain(d_hp - 8, 0, 2)];
+    byte second_out = low_hp[constrain(d_hp, 0, 8)];
+  }
+  
+  else if (health_display_type == '7') {
+    // update health with 7 seg
+    // dependent on number of displays
+  }
+  
+  // update ammo
+  if (ammo_display_type == 'b') {
+    // remap ammo to a scale of 10 for bar graph
+    d_ammo = map(d_ammo, 0, max_ammo, 0, 10);
+    byte third_out = high_ammo[constrain(d_ammo - 8, 0, 2)];
+    byte fourth_out = low_ammo[constrain(d_ammo, 0, 8)];
+  }
+
+  else if (ammo_display_type == '7') {
+    // update ammo count with 7 seg
+    // dependent on number of displays
+  }
+
+  // update team color  
+  // set up fifth_out
+  // TODO: Switch table to extract color information from team byte
+  boolean red = true;
+  boolean green = true;
+  boolean blue = true;
+  
+  if (red) {
+    fifth_out = fifth_out | red_byte;
+  }
+  if (green) {
+    fifth_out = fifth_out | green_byte;
+  }
+  if (blue) {
+    fifth_out = fifth_out | blue_byte;
+  }
+  
+  // send out all data to fill shift registers
+  shiftOut(SHIFT_REGISTER_DATA_PIN, SHIFT_REGISTER_CLOCK_PIN, MSBFIRST, first_out);
+  shiftOut(SHIFT_REGISTER_DATA_PIN, SHIFT_REGISTER_CLOCK_PIN, MSBFIRST, second_out);
+  shiftOut(SHIFT_REGISTER_DATA_PIN, SHIFT_REGISTER_CLOCK_PIN, MSBFIRST, third_out);
+  shiftOut(SHIFT_REGISTER_DATA_PIN, SHIFT_REGISTER_CLOCK_PIN, MSBFIRST, fourth_out);
+  shiftOut(SHIFT_REGISTER_DATA_PIN, SHIFT_REGISTER_CLOCK_PIN, MSBFIRST, fifth_out);
+
+  // push data out of shift registers to update displays
+  digitalWrite(SHIFT_REGISTER_LATCHCLOCK, LOW);
+  delayMicroseconds(5);
+  digitalWrite(SHIFT_REGISTER_LATCHCLOCK, HIGH);
+  delayMicroseconds(5);
+  
+  print_vars();
 }
 
-void playSound(String sfx) {
-  // how to deal with sound overlap? Set priority?
-  // how many sounds can this audio shield play simultaneously?
+void play_sound(String sfx) {
+  // TODO: Set up functionality with Teensie audio shield
 
-  /*
-    if (sfx == "shoot")
-    // play shoot sound
-    else if (sfx == "reload")
-    // play reload sound
-    else if (sfx == "hit")
-    // play hit sound
-    else if (sfx == "outOfAmmo")
-    //play outOfAmmo sound
-  */
+  if (sfx == "shoot") {
+    // play shoot.wav
+  }
+  else if (sfx == "reload_start") {
+    // play reload_start.wav
+  }
+  else if (sfx == "reload_done") {
+    // play reload_done.wav
+  }
+  else if (sfx == "hit") {
+    // play hit.wav
+  }
+  else if (sfx == "out_of_ammo"){
+    //play out_of_ammo.wav
+  }
+  else if (sfx == "out_of_reloads") {
+    //play out_of_reloads.wav
+  }
+  else if (sfx == "refill") {
+    //play refill.wav
+  }
+  else if (sfx == "respawn") {
+    //play respawn.wav
+  }
+  else if (sfx == "dead") {
+    //play dead.wav
+  }
+  
 }
 
 
@@ -350,7 +478,7 @@ long hex_decoder(byte inc_hex){
 
 
 //For debugging purposes
-void printVars(){
+void print_vars(){
   Serial.print("Team - Stored: ");
   Serial.print(team);
   Serial.print(" Received: ");
@@ -387,11 +515,10 @@ void printVars(){
   Serial.println(packetA[4]);
 
   Serial.print("Dead: ");
-  Serial.print(playerDead);
+  Serial.print(player_dead);
   Serial.println(" ");
 
   Serial.print("sendPacket: ");
   Serial.print(sendPacket);
   Serial.println(" ");
 }
-
