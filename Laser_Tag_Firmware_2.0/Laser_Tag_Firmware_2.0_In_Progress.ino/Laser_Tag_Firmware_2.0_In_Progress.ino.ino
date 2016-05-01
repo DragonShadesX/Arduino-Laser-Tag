@@ -49,6 +49,7 @@ unsigned long sendPacket; //This is what the tagger shoots
 int fire_delay = 100;
 boolean player_dead = false;
 bool received_pulse = true;
+bool compatibility_enabled = false;
 
 // timers
 unsigned long last_shoot;
@@ -84,8 +85,13 @@ byte fifth_out;
 /////////////////////////////////
 ////FOR DEBUGGING AND TESTING////
 /////////////////////////////////
+<<<<<<< HEAD
 unsigned long value = 38076239; //Simulates the "value" variable that IRRecv returns after decoding the received packet
 int count = 0;
+=======
+  unsigned long value = 223343103; //Simulates the "value" variable that IRRecv returns after decoding the received packet
+  int count = 0;
+>>>>>>> origin/master
 /////////////////////////////////
 
 
@@ -116,15 +122,45 @@ void loop() {
   //  }
 
   //Hit by admin tool
+<<<<<<< HEAD
   if (received_pulse && packetA[0] == 0) {
+=======
+  if(received_pulse && packetA[0] == 0){
+    Serial.println("Configuring tagger");
+>>>>>>> origin/master
     configure_tagger();
+    received_pulse = false;
   }
 
+<<<<<<< HEAD
   //Hit by non-friendly, non-base
   if (received_pulse && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team) { //Byte 0 is between 1 and 14 indicating a team
     hit();
+=======
+  //Compatibility 
+  if(received_pulse && compatibility_enabled && (value == 1067460051 || value == 2800112845 || value == 2031644225 || value == 2159483741)){ //ffa, t1, t2, t3
+    
+    if(sendPacket == 1067460051 && value == 1067460051){ //Player is FFA and hit by FFA
+      hit(true);
+    }
+
+    if(value != sendPacket && sendPacket != 1067460051 && value != 1067460051){ //Hit by non-friendly, non FFA
+      hit(true);
+    }
+  }
+  
+  
+  //Not playing FFA, Hit by non-friendly, non-base
+  if(received_pulse && !compatibility_enabled && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team && team != 9){ //Byte 0 is between 1 and 14 indicating a team
+    hit(false);
+>>>>>>> origin/master
   }
 
+  //Playing FFA, hit by player playing FFA
+  if(received_pulse && !compatibility_enabled && packetA[1] == 9 && team == 9){ 
+    hit(false);  
+  }
+  
   //Hit by base
   if (received_pulse && packetA[1] == 15 && packetA[0] == team) { //Received packet from a friendly base station
     baseRefill();
@@ -151,9 +187,12 @@ void loop() {
     reload();
   }
 
+<<<<<<< HEAD
   //Fire Modes
 
 
+=======
+>>>>>>> origin/master
   //Reset received_pulse status
   if (received_pulse) {
     received_pulse = false; //Already evaluated this hit, look for the next.
@@ -163,6 +202,7 @@ void loop() {
   ////For debugging!////
   //////////////////////
   count++;
+<<<<<<< HEAD
   if (count == 1) {
     value = 575668223; //224FFFFF Shot by Team 2 player, -10hp
     received_pulse = true;
@@ -173,12 +213,25 @@ void loop() {
   }
   else if (count == 3) {
     value = 1609564159; //5FEFFFFF Shot by team 5 player, -100hp
+=======
+  if(count == 1){
+    value = 2031644225; //LTX T2
+    received_pulse = true;
+  }
+  else if(count == 2) {
+    value = 2800112845; //LTX T1
+    received_pulse = true;
+  }
+  else if(count == 3) {
+    value = 2571435855; //FFA Player
+>>>>>>> origin/master
     received_pulse = true;
   }
   else if (count == 4) {
-    value = 1609564159; //5FEFFFFF Shot by team 5 player, -100hp
+    value = 1067460051; //LTX FFA
     received_pulse = true;
   }
+
 }
 
 
@@ -187,24 +240,50 @@ void loop() {
 ///////////////////////////
 
 
+<<<<<<< HEAD
 void hit() {
   Serial.println("Got hit");
   if (hp < hex_decoder(packetA[2])) {
+=======
+void hit(bool compatibility){
+  Serial.println(" ");
+  Serial.println("Got hit");
+  Serial.println(" ");
+  if(compatibility && (hp == 1)){
+    hp=0;
+  }else if(compatibility && (hp > 1)){
+    hp--;
+  }else if(!compatibility && (hp < hex_decoder(packetA[2]))){
+>>>>>>> origin/master
     hp = 0;
+  }else if(!compatibility && (hp > hex_decoder(packetA[2]))){
+    hp = hp - hex_decoder(packetA[2]);
   }
+<<<<<<< HEAD
   else {
     hp = hp - hex_decoder(packetA[2]); //Took a hit
   }
   if (hp <= 0) {
+=======
+
+  if(hp <= 0){
+    Serial.println(" ");
+>>>>>>> origin/master
     Serial.println("Dead!");
+    Serial.println(" ");
     dead();
   }
   play_sound("hit");
   update_displays(hp, ammo, team);
 }
 
+<<<<<<< HEAD
 void baseRefill() {
   hp = hp - hex_decoder(packetA[3]);
+=======
+void baseRefill(){
+  hp = hp + hex_decoder(packetA[3]);
+>>>>>>> origin/master
   ammo = ammo + hex_decoder(packetA[4]);
   play_sound("refill");
   update_displays(hp, ammo, team);
@@ -250,23 +329,25 @@ void dead() {
   if (respawns <= 0) { //If respawns are already at 0, the player is now dead
     player_dead = true;
     play_sound("dead");
-    update_displays(0, 0, team);
+    //update_displays(0, 0, team);
   }
+<<<<<<< HEAD
   else {
+=======
+  else{
+    Serial.println(" ");
+>>>>>>> origin/master
     Serial.println("Respawning!");
+    Serial.println(" ");
     respawns--; //Respawns are not yet 0, player is still alive.
     hp = 100; //Full health again
-    update_displays(hp, ammo, team);
+    //update_displays(hp, ammo, team);
     play_sound("respawn");
   }
 }
 
-//void noAmmo(){
-//  noAmmo = true;
-//  ammo = 0;
-//}
-
 //Sets all the variables to those given by the admin tool
+<<<<<<< HEAD
 void configure_tagger() {
   team     =  packetA[1];
   hp       =  hex_decoder(packetA[2]);
@@ -291,6 +372,67 @@ void configure_tagger() {
 
   sendPacket = (((unsigned long)((value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((value >> 24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF)); //PEW PEW PEW!!
 
+=======
+void configure_tagger(){
+    
+    //Check if receiving LTX configuration
+    if(packetA[1] == 12 || packetA[1] == 13 || packetA[1] == 14 || packetA[1] == 15){//FFA, T1, T2, T3 - Missing first byte
+      compatibility_enabled = true;
+
+      if(packetA[1] == 12){
+        sendPacket = 1067460051; //Sending LTX FFA HEX
+        team       = 12;
+        ID         = 15;
+      }else if(packetA[1] == 13){
+        sendPacket = 2800112845; //Sending LTX T1 HEX
+        team       = 13;
+        ID         = 15;
+      }else if(packetA[1] == 14){
+        sendPacket = 2031644225; //Sending LTX T2 HEX
+        team       = 14;
+        ID         = 15;
+      }else if(packetA[1] == 15){
+        sendPacket = 2159483741; //Sending LTX T3 HEX
+        team       = 15;
+        ID         = 15;
+      }
+
+      //Stats accross all taggers playing LTX Mode
+      hp       =  hex_decoder(packetA[2]);
+      max_ammo =  hex_decoder(packetA[3]);
+      ammo     =  hex_decoder(packetA[3]); //Reload the tagger
+      respawns =  hex_decoder(packetA[4]);
+      reloads  =  hex_decoder(packetA[5]);
+      damage   =  hex_decoder(packetA[6]);
+      
+    
+    }else{ 
+      compatibility_enabled = false;
+      
+      team     =  packetA[1];
+      hp       =  hex_decoder(packetA[2]);
+      max_ammo =  hex_decoder(packetA[3]);
+      ammo     =  hex_decoder(packetA[3]); //Reload the tagger
+      respawns =  hex_decoder(packetA[4]);
+      reloads  =  hex_decoder(packetA[5]);
+      damage   =  hex_decoder(packetA[6]);
+      ID       =  packetA[7];
+      
+    //*********************Create the Custom Packet for this Tagger*********************
+  
+  //    byte teamEncoded     = constrain(packetA[1], 0x0, 0xf);
+  //    byte hpEncoded       = constrain(packetA[2], 0x0, 0xf);
+  //    byte ammoEncoded     = constrain(packetA[3], 0x0, 0xf);
+  //    byte respawnsEncoded = constrain(packetA[4], 0x0, 0xf);
+  //    byte reloadsEncoded  = constrain(packetA[5], 0x0, 0xf);
+  //    byte damageEncoded   = constrain(packetA[6], 0x0, 0xf);
+  //    byte IDEncoded       = constrain(packetA[7], 0x0, 0xf);
+    
+      //sendPacket = (((unsigned long)((value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((value>>24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF)); //PEW PEW PEW!!
+      sendPacket = (value & 0x0FFFFFFF) | team << 28;
+    }
+    update_displays(hp, ammo, team);
+>>>>>>> origin/master
 }
 
 
@@ -415,6 +557,7 @@ void longToArray(unsigned long packet) {
   packetA[0] = ((packet >> 28) & 0xF);
 }
 
+<<<<<<< HEAD
 long hex_decoder(byte inc_hex) {
   switch (inc_hex) {
     case 0:
@@ -525,6 +668,62 @@ void team_color_decoder(byte i_team) {
       team_color = (false, false, false);
       break;
   }
+=======
+long hex_decoder(byte inc_hex){
+   switch(inc_hex){
+     case 0:
+       return                0;
+       break;
+     case 1:
+       return                1;
+       break;
+     case 2:
+       return                3;
+       break;
+     case 3:
+       return                5;
+       break;
+     case 4:
+       return               10;
+       break;
+     case 5:
+       return               20;
+       break;
+     case 6:
+       return               25;
+       break;
+     case 7:
+       return               30;
+       break;
+     case 8:
+       return               40;
+       break;
+     case 9:
+       return               50;
+       break;
+     case 10:
+       return               60;
+       break;
+     case 11:
+       return               70;
+       break;
+     case 12:
+       return               80;
+       break;
+     case 13:
+       return               90;
+       break;
+     case 14:
+       return              100;
+       break;
+     case 15:
+       return              255;
+       break;
+     default:
+       return                0;
+       break;
+   }
+>>>>>>> origin/master
 }
 
 /////////////////
@@ -533,7 +732,12 @@ void team_color_decoder(byte i_team) {
 
 
 //For debugging purposes
+<<<<<<< HEAD
 void print_vars() {
+=======
+void print_vars(){
+  Serial.println(" ");
+>>>>>>> origin/master
   Serial.print("Team - Stored: ");
   Serial.print(team);
   Serial.print(" Received: ");
@@ -561,7 +765,7 @@ void print_vars() {
 
   Serial.print("ID - Stored: ");
   Serial.print(ID);
-  Serial.print("Received: ");
+  Serial.print(" Received: ");
   Serial.println(packetA[7]);
 
   Serial.print("Respawns - Stored: ");
@@ -573,7 +777,15 @@ void print_vars() {
   Serial.print(player_dead);
   Serial.println(" ");
 
+  Serial.print("Compatibility: ");
+  Serial.print(compatibility_enabled);
+  Serial.println(" ");
+
   Serial.print("sendPacket: ");
   Serial.print(sendPacket);
+  Serial.println(" ");
+
+  Serial.print("receivedPacket: ");
+  Serial.print(value);
   Serial.println(" ");
 }
