@@ -9,6 +9,29 @@
 */
 
 #include <IRremote.h>
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SerialFlash.h>
+
+/////////////////////
+// Audio Things :3 //
+/////////////////////
+
+AudioPlaySdWav           playWav1;
+// Use one of these 3 output types: Digital I2S, Digital S/PDIF, or Analog DAC
+AudioOutputI2S           audioOutput;
+//AudioOutputSPDIF       audioOutput;
+//AudioOutputAnalog      audioOutput;
+AudioConnection          patchCord1(playWav1, 0, audioOutput, 0);
+AudioConnection          patchCord2(playWav1, 1, audioOutput, 1);
+AudioControlSGTL5000     sgtl5000_1;
+
+// Use these with the audio adaptor board
+#define SDCARD_CS_PIN    10
+#define SDCARD_MOSI_PIN  7
+#define SDCARD_SCK_PIN   14
 
 // grabbed these from Greg's code; not sure if pin numbers changed
 #define SHIFT_REGISTER_DATA_PIN  0
@@ -104,7 +127,24 @@ void setup() {
   //Enable IR reciver
   irrecv.enableIRIn();
 
-  //update displays? or not until tagged by admin?
+  //Audio setup
+  AudioMemory(8);
+
+  // Comment these out if not using the audio adaptor board.
+  // This may wait forever if the SDA & SCL pins lack
+  // pullup resistors
+  sgtl5000_1.enable();
+  sgtl5000_1.volume(0.5);
+
+  SPI.setMOSI(SDCARD_MOSI_PIN);
+  SPI.setSCK(SDCARD_SCK_PIN);
+  if (!(SD.begin(SDCARD_CS_PIN))) {
+    // stop here, but print a message repetitively
+    while (1) {
+      Serial.println("Unable to access the SD card");
+      delay(500);
+    }
+  }
 }
 
 void loop() {
@@ -261,7 +301,7 @@ void hit(bool compatibility){
     Serial.println(" ");
     dead();
   }
-  play_sound("hit");
+  playFile("HIT.WAV");
   update_displays(hp, ammo, team);
 }
 
@@ -270,7 +310,7 @@ void baseRefill(){
   hp = hp + hex_decoder(packetA[3]);
   
   ammo = ammo + hex_decoder(packetA[4]);
-  play_sound("refill");
+  playFile("REFILL.WAV");
   update_displays(hp, ammo, team);
 }
 
@@ -280,19 +320,19 @@ void shoot() {
     irrecv.enableIRIn();
     ammo--;
     update_displays(hp, ammo, team);
-    play_sound("shoot");
+    playFile("SHOOT.WAV");
     last_shoot = millis();
     shoot_ready = false;
   }
   else {
-    play_sound("out_of_ammo");
+    playFile("OOA.WAV");
   }
 }
 
 void reload() {
   if (reloads == 255) {
     ammo = max_ammo;
-    play_sound("reload");
+    playFile("RELOAD.WAV");
     last_reload = millis();
     reload_ready = false;
     update_displays(hp, ammo, team);
@@ -300,20 +340,20 @@ void reload() {
   else if (reloads != 0) {
     ammo = max_ammo;
     reloads--;
-    play_sound("reload");
+    playFile("RELOAD.WAV");
     last_reload = millis();
     reload_ready = false;
     update_displays(hp, ammo, team);
   }
   else {
-    play_sound("out_of_reloads");
+    playFile("OOA.WAV");
   }
 }
 
 void dead() {
   if (respawns <= 0) { //If respawns are already at 0, the player is now dead
     player_dead = true;
-    play_sound("dead");
+    playFile("DEAD.WAV");
     //update_displays(0, 0, team);
   }
  
@@ -324,7 +364,7 @@ void dead() {
     respawns--; //Respawns are not yet 0, player is still alive.
     hp = 100; //Full health again
     //update_displays(hp, ammo, team);
-    play_sound("respawn");
+    playFile("RESPAWN.WAV");
   }
 }
 
@@ -464,37 +504,26 @@ void update_displays(int d_hp, int d_ammo, byte d_team) {
   print_vars();
 }
 
-void play_sound(String sfx) {
-  // TODO: Set up functionality with Teensie audio shield
+void playFile(const char *filename)
+{
+  Serial.print("Playing audio file: ");
+  Serial.println(filename);
 
-  if (sfx == "shoot") {
-    // play shoot.wav
-  }
-  else if (sfx == "reload_start") {
-    // play reload_start.wav
-  }
-  else if (sfx == "reload_done") {
-    // play reload_done.wav
-  }
-  else if (sfx == "hit") {
-    // play hit.wav
-  }
-  else if (sfx == "out_of_ammo") {
-    //play out_of_ammo.wav
-  }
-  else if (sfx == "out_of_reloads") {
-    //play out_of_reloads.wav
-  }
-  else if (sfx == "refill") {
-    //play refill.wav
-  }
-  else if (sfx == "respawn") {
-    //play respawn.wav
-  }
-  else if (sfx == "dead") {
-    //play dead.wav
-  }
+  // Start playing the file.  This sketch continues to
+  // run while the file plays.
+  playWav1.play(filename);
 
+  // A brief delay for the library read WAV info
+  delay(5);
+
+  // Simply wait for the file to finish playing.
+  //while (playWav1.isPlaying()) {
+    // uncomment these lines if you audio shield
+    // has the optional volume pot soldered
+    //float vol = analogRead(15);
+    //vol = vol / 1024;
+    // sgtl5000_1.volume(vol);
+  //}
 }
 
 
