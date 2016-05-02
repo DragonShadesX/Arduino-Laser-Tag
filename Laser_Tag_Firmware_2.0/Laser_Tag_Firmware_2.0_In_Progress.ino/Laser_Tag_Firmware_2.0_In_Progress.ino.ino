@@ -162,16 +162,10 @@ void loop() {
 
   if(received_pulse && packetA[0] == 0){
     Serial.println("Configuring tagger");
-  
     configure_tagger();
     received_pulse = false;
   }
 
- 
-  //Hit by non-friendly, non-base
-  if (received_pulse && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team) { //Byte 0 is between 1 and 14 indicating a team
-    hit(false);
-  }
   //Compatibility 
   if(received_pulse && compatibility_enabled && (value == 1067460051 || value == 2800112845 || value == 2031644225 || value == 2159483741)){ //ffa, t1, t2, t3
     
@@ -184,11 +178,9 @@ void loop() {
     }
   }
   
-  
   //Not playing FFA, Hit by non-friendly, non-base
   if(received_pulse && !compatibility_enabled && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team && team != 9){ //Byte 0 is between 1 and 14 indicating a team
     hit(false);
-  
   }
 
   //Playing FFA, hit by player playing FFA
@@ -222,12 +214,6 @@ void loop() {
     reload();
   }
 
- 
-  //Fire Modes
-
-
-  
-  
   //Reset received_pulse status
   if (received_pulse) {
     received_pulse = false; //Already evaluated this hit, look for the next.
@@ -266,7 +252,6 @@ void loop() {
     value = 1067460051; //LTX FFA
     received_pulse = true;
   }
-
 }
 
 
@@ -279,24 +264,18 @@ void hit(bool compatibility){
   Serial.println(" ");
   Serial.println("Got hit");
   Serial.println(" ");
-  if(compatibility && (hp == 1)){
+  if(compatibility && (hp == 0)){
     hp=0;
   }else if(compatibility && (hp > 1)){
     hp--;
   }else if(!compatibility && (hp < hex_decoder(packetA[2]))){
-  
     hp = 0;
   }else if(!compatibility && (hp > hex_decoder(packetA[2]))){
     hp = hp - hex_decoder(packetA[2]);
   }
- 
-  else {
-    hp = hp - hex_decoder(packetA[2]); //Took a hit
-  }
-
+  
   if(hp <= 0){
     Serial.println(" ");
-  
     Serial.println("Dead!");
     Serial.println(" ");
     dead();
@@ -308,7 +287,6 @@ void hit(bool compatibility){
  
 void baseRefill(){
   hp = hp + hex_decoder(packetA[3]);
-  
   ammo = ammo + hex_decoder(packetA[4]);
   playFile("REFILL.WAV");
   update_displays(hp, ammo, team);
@@ -369,8 +347,6 @@ void dead() {
 }
 
 //Sets all the variables to those given by the admin tool
- 
-
 void configure_tagger(){
     
     //Check if receiving LTX configuration
@@ -603,6 +579,7 @@ void team_color_decoder(byte i_team) {
   }
 }
 
+//Hack fix to change less lines of code in the above function
 void color_assigner(bool first, bool second, bool third){
   team_color[0] = first;
   team_color[1] = second;
