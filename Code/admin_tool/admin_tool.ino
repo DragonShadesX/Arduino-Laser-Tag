@@ -203,6 +203,10 @@ void loop() {
 
     if (last_dir == 'c'){
       irsend.sendRC6( ((team << 28) | (set_team << 24) | (hp << 20) | (ammo << 16) | (respawns << 12) | (reloads << 8) | (damage << 4) | ID), 32);
+      
+      lcd.clear();
+      lcd.print((team << 28) | (set_team << 24) | (hp << 20) | (ammo << 16) | (respawns << 12) | (reloads << 8) | (damage << 4) | ID);
+      delay(5000);
       irrecv.enableIRIn();
     }
   }
