@@ -21,9 +21,9 @@
 
 AudioPlaySdWav           playWav1;
 // Use one of these 3 output types: Digital I2S, Digital S/PDIF, or Analog DAC
-AudioOutputI2S           audioOutput;
+//AudioOutputI2S           audioOutput;
 //AudioOutputSPDIF       audioOutput;
-//AudioOutputAnalog      audioOutput;
+AudioOutputAnalog      audioOutput;
 AudioConnection          patchCord1(playWav1, 0, audioOutput, 0);
 AudioConnection          patchCord2(playWav1, 1, audioOutput, 1);
 AudioControlSGTL5000     sgtl5000_1;
@@ -34,20 +34,20 @@ AudioControlSGTL5000     sgtl5000_1;
 #define SDCARD_SCK_PIN   14
 
 // grabbed these from Greg's code; not sure if pin numbers changed
-#define SHIFT_REGISTER_DATA_PIN  0
-#define SHIFT_REGISTER_CLOCK_PIN  2
-#define SHIFT_REGISTER_LATCHCLOCK  1
+#define SHIFT_REGISTER_DATA_PIN  2
+#define SHIFT_REGISTER_CLOCK_PIN  1
+#define SHIFT_REGISTER_LATCHCLOCK  0
 
 // IR setup
-int RECV_PIN = 10;
+int RECV_PIN = 4;
 IRsend irsend;
 IRrecv irrecv(RECV_PIN);
 decode_results results;
 
 // pins
-int trigger_pin = 1;
-int reload_pin  = 2;
-int light_pin   = 3;
+int trigger_pin = 17;
+int reload_pin  = 20;
+int light_pin   = 21;
 
 //////////////////////////
 // Initialize Variables //
@@ -109,7 +109,7 @@ byte fifth_out;
 ////FOR DEBUGGING AND TESTING////
 /////////////////////////////////
  
-unsigned long value = 38076239; //Simulates the "value" variable that IRRecv returns after decoding the received packet
+//unsigned long results.value = 38076239; //Simulates the "results.value" variable that IRRecv returns after decoding the received packet
 int count = 0;
   
 /////////////////////////////////
@@ -148,15 +148,17 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("   ");
-  longToArray(value);
+  delay(5);
+  //Serial.println("   ");
+  //longToArray(results.value);
 
   //Pulse Received
-  //  if(irrecv.decode(&results)){
-  //    longToArray(value);
-  //    irrecv.resume();
-  //    received_pulse = true;
-  //  }
+    if(irrecv.decode(&results)){
+      Serial.print("received pulse");
+      longToArray(results.value);
+      irrecv.resume();
+      received_pulse = true;
+    }
 
   //Hit by admin tool
 
@@ -167,13 +169,13 @@ void loop() {
   }
 
   //Compatibility 
-  if(received_pulse && compatibility_enabled && (value == 1067460051 || value == 2800112845 || value == 2031644225 || value == 2159483741)){ //ffa, t1, t2, t3
+  if(received_pulse && compatibility_enabled && (results.value == 1067460051 || results.value == 2800112845 || results.value == 2031644225 || results.value == 2159483741)){ //ffa, t1, t2, t3
     
-    if(sendPacket == 1067460051 && value == 1067460051){ //Player is FFA and hit by FFA
+    if(sendPacket == 1067460051 && results.value == 1067460051){ //Player is FFA and hit by FFA
       hit(true);
     }
 
-    if(value != sendPacket && sendPacket != 1067460051 && value != 1067460051){ //Hit by non-friendly, non FFA
+    if(results.value != sendPacket && sendPacket != 1067460051 && results.value != 1067460051){ //Hit by non-friendly, non FFA
       hit(true);
     }
   }
@@ -222,36 +224,38 @@ void loop() {
   //////////////////////
   ////For debugging!////
   //////////////////////
-  count++;
- 
-  if (count == 1) {
-    value = 575668223; //224FFFFF Shot by Team 2 player, -10hp
-    received_pulse = true;
-  }
-  else if (count == 2) {
-    value = 1432354815; //555FFFFF Shot by Team 5 player, -20hp
-    received_pulse = true;
-  }
-  else if (count == 3) {
-    value = 1609564159; //5FEFFFFF Shot by team 5 player, -100hp
-  }
-  if(count == 1){
-    value = 2031644225; //LTX T2
-    received_pulse = true;
-  }
-  else if(count == 2) {
-    value = 2800112845; //LTX T1
-    received_pulse = true;
-  }
-  else if(count == 3) {
-    value = 2571435855; //FFA Player
-  
-    received_pulse = true;
-  }
-  else if (count == 4) {
-    value = 1067460051; //LTX FFA
-    received_pulse = true;
-  }
+//  count++;
+// 
+//  if (count == 1) {
+//    results.value = 575668223; //224FFFFF Shot by Team 2 player, -10hp
+//    received_pulse = true;
+//  }
+//  else if (count == 2) {
+//    results.value = 1432354815; //555FFFFF Shot by Team 5 player, -20hp
+//    received_pulse = true;
+//  }
+//  else if (count == 3) {
+//    results.value = 1609564159; //5FEFFFFF Shot by team 5 player, -100hp
+//  }
+//  if(count == 1){
+//    results.value = 2031644225; //LTX T2
+//    received_pulse = true;
+//  }
+//  else if(count == 2) {
+//    results.value = 2800112845; //LTX T1
+//    received_pulse = true;
+//  }
+//  else if(count == 3) {
+//    results.value = 2571435855; //FFA Player
+//  
+//    received_pulse = true;
+//  }
+//  else if (count == 4) {
+//    results.value = 1067460051; //LTX FFA
+//    received_pulse = true;
+//  }
+
+  //print_vars();
 }
 
 
@@ -402,8 +406,8 @@ void configure_tagger(){
   //    byte damageEncoded   = constrain(packetA[6], 0x0, 0xf);
   //    byte IDEncoded       = constrain(packetA[7], 0x0, 0xf);
     
-      //sendPacket = (((unsigned long)((value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((value>>24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF)); //PEW PEW PEW!!
-      sendPacket = (value & 0x0FFFFFFF) | team << 28;
+      //sendPacket = (((unsigned long)((results.value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((results.value>>24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF)); //PEW PEW PEW!!
+      sendPacket = (results.value & 0x0FFFFFFF) | team << 28;
     }
     update_displays(hp, ammo, team);
   
@@ -701,6 +705,6 @@ void print_vars(){
   Serial.println(" ");
 
   Serial.print("receivedPacket: ");
-  Serial.print(value);
+  Serial.print(results.value);
   Serial.println(" ");
 }
