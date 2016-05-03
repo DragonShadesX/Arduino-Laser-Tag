@@ -19,14 +19,14 @@
 // Audio Things :3 //
 /////////////////////
 
-AudioPlaySdWav           playWav1;
+//AudioPlaySdWav           playWav1;
 // Use one of these 3 output types: Digital I2S, Digital S/PDIF, or Analog DAC
 //AudioOutputI2S           audioOutput;
 //AudioOutputSPDIF       audioOutput;
-AudioOutputAnalog      audioOutput;
-AudioConnection          patchCord1(playWav1, 0, audioOutput, 0);
-AudioConnection          patchCord2(playWav1, 1, audioOutput, 1);
-AudioControlSGTL5000     sgtl5000_1;
+//AudioOutputAnalog      audioOutput;
+//AudioConnection          patchCord1(playWav1, 0, audioOutput, 0);
+//AudioConnection          patchCord2(playWav1, 1, audioOutput, 1);
+//AudioControlSGTL5000     sgtl5000_1;
 
 // Use these with the audio adaptor board
 #define SDCARD_CS_PIN    10
@@ -83,7 +83,7 @@ unsigned long sendPacket; //This is what the tagger shoots
 
 // stats
 int fire_delay = 100;
-boolean player_dead = false;
+bool player_dead = false;
 bool received_pulse = true;
 bool compatibility_enabled = false;
 
@@ -121,10 +121,10 @@ byte fifth_out;
 /////////////////////////////////
 ////FOR DEBUGGING AND TESTING////
 /////////////////////////////////
- 
+
 //unsigned long results.value = 38076239; //Simulates the "results.value" variable that IRRecv returns after decoding the received packet
 int count = 0;
-  
+
 /////////////////////////////////
 
 
@@ -152,7 +152,7 @@ void setup() {
   //SPI.setMOSI(SDCARD_MOSI_PIN);
   //SPI.setSCK(SDCARD_SCK_PIN);
   //if (!(SD.begin(SDCARD_CS_PIN))) {
-    // stop here, but print a message repetitively
+  // stop here, but print a message repetitively
   //  while (1) {
   //    Serial.println("Unable to access the SD card");
   //    delay(500);
@@ -166,6 +166,7 @@ void loop() {
   //longToArray(results.value);
 
   //Pulse Received
+<<<<<<< HEAD
     if(irrecv.decode(&results)){
       Serial.println("received pulse");
       longToArray(results.value);
@@ -173,27 +174,43 @@ void loop() {
       received_pulse = true;
       print_vars();
     }
+=======
+  if (irrecv.decode(&results)) {
+    Serial.print("received pulse");
+    longToArray(results.value);
+    irrecv.resume();
+    received_pulse = true;
+  }
+>>>>>>> origin/master
 
   //Hit by admin tool
 
-  if(received_pulse && packetA[0] == 0){
+  if (received_pulse && packetA[0] == 0) {
     Serial.println("Configuring tagger");
     //configure_tagger();
     received_pulse = false;
   }
 
+<<<<<<< HEAD
   //Compatibility 
   if(received_pulse && (results.value == 1067460051)){// || results.value == 2800112845 || results.value == 2031644225 || results.value == 2159483741)){ //ffa, t1, t2, t3
     
     //if(sendPacket == 1067460051 && results.value == 1067460051){ //Player is FFA and hit by FFA
       Serial.println("Hit lol!");
+=======
+  //Compatibility
+  if (received_pulse && compatibility_enabled && (results.value == 1067460051 || results.value == 2800112845 || results.value == 2031644225 || results.value == 2159483741)) { //ffa, t1, t2, t3
+
+    if (sendPacket == 1067460051 && results.value == 1067460051) { //Player is FFA and hit by FFA
+>>>>>>> origin/master
       hit(true);
     //}
 
-    if(results.value != sendPacket && sendPacket != 1067460051 && results.value != 1067460051){ //Hit by non-friendly, non FFA
+    if (results.value != sendPacket && sendPacket != 1067460051 && results.value != 1067460051) { //Hit by non-friendly, non FFA
       hit(true);
     }
   }
+<<<<<<< HEAD
   
 //  //Not playing FFA, Hit by non-friendly, non-base
 //  if(received_pulse && !compatibility_enabled && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team && team != 9){ //Byte 0 is between 1 and 14 indicating a team
@@ -220,6 +237,34 @@ void loop() {
 //    shoot_ready = true;
 //  }
 //
+=======
+
+  //Not playing FFA, Hit by non-friendly, non-base
+  if (received_pulse && !compatibility_enabled && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team && team != 9) { //Byte 0 is between 1 and 14 indicating a team
+    hit(false);
+  }
+
+  //Playing FFA, hit by player playing FFA
+  if (received_pulse && !compatibility_enabled && packetA[1] == 9 && team == 9) {
+    hit(false);
+  }
+
+  //Hit by base
+  if (received_pulse && packetA[1] == 15 && packetA[0] == team) { //Received packet from a friendly base station
+    baseRefill();
+  }
+
+  //Prevents spamming reload
+  if (!reload_ready && millis() > last_reload + reload_time) {
+    reload_ready = true;
+  }
+
+  //Prevents spamming shooting
+  if (!shoot_ready && millis() > last_shoot + shoot_time) {
+    shoot_ready = true;
+  }
+
+>>>>>>> origin/master
   //Shoot
   //Only if the player is alive and is ready to shoot
 //  if (digitalRead(trigger_pin) && !player_dead && reload_ready && shoot_ready) {
@@ -239,36 +284,36 @@ void loop() {
   //////////////////////
   ////For debugging!////
   //////////////////////
-//  count++;
-// 
-//  if (count == 1) {
-//    results.value = 575668223; //224FFFFF Shot by Team 2 player, -10hp
-//    received_pulse = true;
-//  }
-//  else if (count == 2) {
-//    results.value = 1432354815; //555FFFFF Shot by Team 5 player, -20hp
-//    received_pulse = true;
-//  }
-//  else if (count == 3) {
-//    results.value = 1609564159; //5FEFFFFF Shot by team 5 player, -100hp
-//  }
-//  if(count == 1){
-//    results.value = 2031644225; //LTX T2
-//    received_pulse = true;
-//  }
-//  else if(count == 2) {
-//    results.value = 2800112845; //LTX T1
-//    received_pulse = true;
-//  }
-//  else if(count == 3) {
-//    results.value = 2571435855; //FFA Player
-//  
-//    received_pulse = true;
-//  }
-//  else if (count == 4) {
-//    results.value = 1067460051; //LTX FFA
-//    received_pulse = true;
-//  }
+  //  count++;
+  //
+  //  if (count == 1) {
+  //    results.value = 575668223; //224FFFFF Shot by Team 2 player, -10hp
+  //    received_pulse = true;
+  //  }
+  //  else if (count == 2) {
+  //    results.value = 1432354815; //555FFFFF Shot by Team 5 player, -20hp
+  //    received_pulse = true;
+  //  }
+  //  else if (count == 3) {
+  //    results.value = 1609564159; //5FEFFFFF Shot by team 5 player, -100hp
+  //  }
+  //  if(count == 1){
+  //    results.value = 2031644225; //LTX T2
+  //    received_pulse = true;
+  //  }
+  //  else if(count == 2) {
+  //    results.value = 2800112845; //LTX T1
+  //    received_pulse = true;
+  //  }
+  //  else if(count == 3) {
+  //    results.value = 2571435855; //FFA Player
+  //
+  //    received_pulse = true;
+  //  }
+  //  else if (count == 4) {
+  //    results.value = 1067460051; //LTX FFA
+  //    received_pulse = true;
+  //  }
 
   //print_vars();
 }
@@ -279,11 +324,33 @@ void loop() {
 ///////////////////////////
 
 
+<<<<<<< HEAD
 void hit(bool compatibility){
   if(hp <= 0){
     //dead();
   }else{
     hp--;
+=======
+void hit(bool compatibility) {
+  Serial.println(" ");
+  Serial.println("Got hit");
+  Serial.println(" ");
+  if (compatibility && (hp == 0)) {
+    hp = 0;
+  } else if (compatibility && (hp > 1)) {
+    hp--;
+  } else if (!compatibility && (hp < hex_decoder(packetA[2]))) {
+    hp = 0;
+  } else if (!compatibility && (hp > hex_decoder(packetA[2]))) {
+    hp = hp - hex_decoder(packetA[2]);
+  }
+
+  if (hp <= 0) {
+    Serial.println(" ");
+    Serial.println("Dead!");
+    Serial.println(" ");
+    dead();
+>>>>>>> origin/master
   }
 
 //  Serial.println(" ");
@@ -309,8 +376,8 @@ void hit(bool compatibility){
   update_displays(hp, ammo, team);
 }
 
- 
-void baseRefill(){
+
+void baseRefill() {
   hp = hp + hex_decoder(packetA[3]);
   ammo = ammo + hex_decoder(packetA[4]);
   //playFile("REFILL.WAV");
@@ -362,8 +429,8 @@ void dead() {
     playFile("DEAD.WAV");
     update_displays(0, 0, team);
   }
- 
-  else{
+
+  else {
     Serial.println(" ");
     Serial.println("Respawning!");
     Serial.println(" ");
@@ -375,66 +442,66 @@ void dead() {
 }
 
 //Sets all the variables to those given by the admin tool
-void configure_tagger(){
-    
-    //Check if receiving LTX configuration
-    if(packetA[1] == 12 || packetA[1] == 13 || packetA[1] == 14 || packetA[1] == 15){//FFA, T1, T2, T3 - Missing first byte
-      compatibility_enabled = true;
+void configure_tagger() {
 
-      if(packetA[1] == 12){
-        sendPacket = 1067460051; //Sending LTX FFA HEX
-        team       = 12;
-        ID         = 15;
-      }else if(packetA[1] == 13){
-        sendPacket = 2800112845; //Sending LTX T1 HEX
-        team       = 13;
-        ID         = 15;
-      }else if(packetA[1] == 14){
-        sendPacket = 2031644225; //Sending LTX T2 HEX
-        team       = 14;
-        ID         = 15;
-      }else if(packetA[1] == 15){
-        sendPacket = 2159483741; //Sending LTX T3 HEX
-        team       = 15;
-        ID         = 15;
-      }
+  //Check if receiving LTX configuration
+  if (packetA[1] == 12 || packetA[1] == 13 || packetA[1] == 14 || packetA[1] == 15) { //FFA, T1, T2, T3 - Missing first byte
+    compatibility_enabled = true;
 
-      //Stats accross all taggers playing LTX Mode
-      hp       =  hex_decoder(packetA[2]);
-      max_ammo =  hex_decoder(packetA[3]);
-      ammo     =  hex_decoder(packetA[3]); //Reload the tagger
-      respawns =  hex_decoder(packetA[4]);
-      reloads  =  hex_decoder(packetA[5]);
-      damage   =  hex_decoder(packetA[6]);
-      
-    
-    }else{ 
-      compatibility_enabled = false;
-      
-      team     =  packetA[1];
-      hp       =  hex_decoder(packetA[2]);
-      max_ammo =  hex_decoder(packetA[3]);
-      ammo     =  hex_decoder(packetA[3]); //Reload the tagger
-      respawns =  hex_decoder(packetA[4]);
-      reloads  =  hex_decoder(packetA[5]);
-      damage   =  hex_decoder(packetA[6]);
-      ID       =  packetA[7];
-      
-    //*********************Create the Custom Packet for this Tagger*********************
-  
-  //    byte teamEncoded     = constrain(packetA[1], 0x0, 0xf);
-  //    byte hpEncoded       = constrain(packetA[2], 0x0, 0xf);
-  //    byte ammoEncoded     = constrain(packetA[3], 0x0, 0xf);
-  //    byte respawnsEncoded = constrain(packetA[4], 0x0, 0xf);
-  //    byte reloadsEncoded  = constrain(packetA[5], 0x0, 0xf);
-  //    byte damageEncoded   = constrain(packetA[6], 0x0, 0xf);
-  //    byte IDEncoded       = constrain(packetA[7], 0x0, 0xf);
-    
-      //sendPacket = (((unsigned long)((results.value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((results.value>>24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF)); //PEW PEW PEW!!
-      sendPacket = (results.value & 0x0FFFFFFF) | team << 28;
+    if (packetA[1] == 12) {
+      sendPacket = 1067460051; //Sending LTX FFA HEX
+      team       = 12;
+      ID         = 15;
+    } else if (packetA[1] == 13) {
+      sendPacket = 2800112845; //Sending LTX T1 HEX
+      team       = 13;
+      ID         = 15;
+    } else if (packetA[1] == 14) {
+      sendPacket = 2031644225; //Sending LTX T2 HEX
+      team       = 14;
+      ID         = 15;
+    } else if (packetA[1] == 15) {
+      sendPacket = 2159483741; //Sending LTX T3 HEX
+      team       = 15;
+      ID         = 15;
     }
-    update_displays(hp, ammo, team);
-  
+
+    //Stats accross all taggers playing LTX Mode
+    hp       =  hex_decoder(packetA[2]);
+    max_ammo =  hex_decoder(packetA[3]);
+    ammo     =  hex_decoder(packetA[3]); //Reload the tagger
+    respawns =  hex_decoder(packetA[4]);
+    reloads  =  hex_decoder(packetA[5]);
+    damage   =  hex_decoder(packetA[6]);
+
+
+  } else {
+    compatibility_enabled = false;
+
+    team     =  packetA[1];
+    hp       =  hex_decoder(packetA[2]);
+    max_ammo =  hex_decoder(packetA[3]);
+    ammo     =  hex_decoder(packetA[3]); //Reload the tagger
+    respawns =  hex_decoder(packetA[4]);
+    reloads  =  hex_decoder(packetA[5]);
+    damage   =  hex_decoder(packetA[6]);
+    ID       =  packetA[7];
+
+    //*********************Create the Custom Packet for this Tagger*********************
+
+    //    byte teamEncoded     = constrain(packetA[1], 0x0, 0xf);
+    //    byte hpEncoded       = constrain(packetA[2], 0x0, 0xf);
+    //    byte ammoEncoded     = constrain(packetA[3], 0x0, 0xf);
+    //    byte respawnsEncoded = constrain(packetA[4], 0x0, 0xf);
+    //    byte reloadsEncoded  = constrain(packetA[5], 0x0, 0xf);
+    //    byte damageEncoded   = constrain(packetA[6], 0x0, 0xf);
+    //    byte IDEncoded       = constrain(packetA[7], 0x0, 0xf);
+
+    //sendPacket = (((unsigned long)((results.value << 4 ) & 0xFFFFFFFF) >> 4 & 0xFFFFFFFF) | ((results.value>>24 & 0xFFFFFFFF) << 28 & 0xFFFFFFFF)); //PEW PEW PEW!!
+    sendPacket = (results.value & 0x0FFFFFFF) | team << 28;
+  }
+  update_displays(hp, ammo, team);
+
 }
 
 
@@ -548,7 +615,7 @@ void longToArray(unsigned long packet) {
   packetA[0] = ((packet >> 28) & 0xF);
 }
 
- 
+
 
 void team_color_decoder(byte i_team) {
   switch (i_team) {
@@ -603,72 +670,72 @@ void team_color_decoder(byte i_team) {
     default:                             //Turn off if failed :/
       color_assigner(false, false, false);
       break;
-  
+
   }
 }
 
 //Hack fix to change less lines of code in the above function
-void color_assigner(bool first, bool second, bool third){
+void color_assigner(bool first, bool second, bool third) {
   team_color[0] = first;
   team_color[1] = second;
   team_color[2] = third;
 }
 
-long hex_decoder(byte inc_hex){
-   switch(inc_hex){
-     case 0:
-       return                0;
-       break;
-     case 1:
-       return                1;
-       break;
-     case 2:
-       return                3;
-       break;
-     case 3:
-       return                5;
-       break;
-     case 4:
-       return               10;
-       break;
-     case 5:
-       return               20;
-       break;
-     case 6:
-       return               25;
-       break;
-     case 7:
-       return               30;
-       break;
-     case 8:
-       return               40;
-       break;
-     case 9:
-       return               50;
-       break;
-     case 10:
-       return               60;
-       break;
-     case 11:
-       return               70;
-       break;
-     case 12:
-       return               80;
-       break;
-     case 13:
-       return               90;
-       break;
-     case 14:
-       return              100;
-       break;
-     case 15:
-       return              255;
-       break;
-     default:
-       return                0;
-       break;
-   }
-  
+long hex_decoder(byte inc_hex) {
+  switch (inc_hex) {
+    case 0:
+      return                0;
+      break;
+    case 1:
+      return                1;
+      break;
+    case 2:
+      return                3;
+      break;
+    case 3:
+      return                5;
+      break;
+    case 4:
+      return               10;
+      break;
+    case 5:
+      return               20;
+      break;
+    case 6:
+      return               25;
+      break;
+    case 7:
+      return               30;
+      break;
+    case 8:
+      return               40;
+      break;
+    case 9:
+      return               50;
+      break;
+    case 10:
+      return               60;
+      break;
+    case 11:
+      return               70;
+      break;
+    case 12:
+      return               80;
+      break;
+    case 13:
+      return               90;
+      break;
+    case 14:
+      return              100;
+      break;
+    case 15:
+      return              255;
+      break;
+    default:
+      return                0;
+      break;
+  }
+
 }
 
 /////////////////
@@ -678,9 +745,9 @@ long hex_decoder(byte inc_hex){
 
 //For debugging purposes
 
-void print_vars(){
+void print_vars() {
   Serial.println(" ");
-  
+
   Serial.print("Team - Stored: ");
   Serial.print(team);
   Serial.print(" Received: ");
