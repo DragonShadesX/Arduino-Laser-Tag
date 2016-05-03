@@ -4,7 +4,7 @@ Default byte to number code/decoding
 (0=0, 1=1, 2=3, 3=5, 4=10, 5=20, 6=25, 7=30, 8=40, 9=50, A=60, B=70, C=80, D=90, E=100 F=infinite/all)
 
 Phoenix LTX send values
-ffa - 3FA025D3
+ffa - 3FA025D3  (RAW16 -6050 2900 -2100 950 -2050 950 -2050 900 -2050 1000 -2000 950 -2050 900 -2100 1000 )
 t1  - A6E654CD
 t2  - 79186E41
 t3  - 80B71B5D
