@@ -1,4 +1,4 @@
-//this is the last minute "I just need it to work" version of the code
+ //this is the last minute "I just need it to work" version of the code
 //it only does FFA but it also works with the Phoenix LTX taggers
 
 #include <IRremote.h>
@@ -112,10 +112,10 @@ void loop() {
       ammo--;
       //irsend.sendRC6(send_packet, 32);
       //unsigned int test_buffer[16] = {-6050, 2900, -2100, 950, -2050, 950, -2050, 900, -2050, 1000, -2000, 950, -2050, 900, -2100, 1000};
-      unsigned int test_buffer[16] = {6050, 2900, 2100, 950, 2050, 950, 2050, 900, 2050, 1000, 2000, 950, 2050, 900, 2100, 1000};
+      unsigned int test_buffer[] = {6050, 2900, 2100, 950, 2050, 950, 2050, 900, 2050, 1000, 2000, 950, 2050, 900, 2100, 1000};
       irsend.sendRaw(test_buffer, 16, 38); 
-
       irrecv.enableIRIn();
+      digitalWrite(light_pin, HIGH);
       last_shoot = millis();
       shoot_ready = false;
       update_displays(hp, ammo);
@@ -146,6 +146,7 @@ void loop() {
   //Prevents spamming shooting
   if (!shoot_ready && millis() > last_shoot + shoot_time) {
     shoot_ready = true;
+    digitalWrite(light_pin, LOW);
   }
   
   if(hp <= 0 && ((shoot_ready == true) || (reload_ready == true) ) ){
