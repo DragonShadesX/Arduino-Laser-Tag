@@ -9,11 +9,11 @@
 */
 
 #include <IRremote.h>
-//#include <Audio.h>
-//#include <Wire.h>
-//#include <SPI.h>
-//#include <SD.h>
-//#include <SerialFlash.h>
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SerialFlash.h>
 
 /////////////////////
 // Audio Things :3 //
@@ -45,26 +45,39 @@ IRrecv irrecv(RECV_PIN);
 decode_results results;
 
 // pins
-int trigger_pin = 17;
+int trigger_pin = 21;
 int reload_pin  = 20;
-int light_pin   = 21;
+int light_pin   = 17;
 
 //////////////////////////
 // Initialize Variables //
 //////////////////////////
 
+//byte packetA[7];
+//byte team     = 0x0;
+//byte set_team = 0x0;
+//byte max_hp   = 0x0;
+//byte hp       = 0x0;
+//byte max_ammo = 0x0;
+//byte ammo     = 0x0;
+//byte respawns = 0x0;
+//byte reloads  = 0x0;
+//byte damage   = 0x0;
+//byte ID       = 0x0;
+//byte amount   = 0x0;
+
 byte packetA[7];
-byte team     = 0x0;
-byte set_team = 0x0;
-byte max_hp   = 0x0;
-byte hp       = 0x0;
-byte max_ammo = 0x0;
-byte ammo     = 0x0;
-byte respawns = 0x0;
-byte reloads  = 0x0;
-byte damage   = 0x0;
-byte ID       = 0x0;
-byte amount   = 0x0;
+byte team     = 11;
+byte set_team = 11;
+byte max_hp   = 25;
+byte hp       = 25;
+byte max_ammo = 10;
+byte ammo     = 10;
+byte respawns = 0;
+byte reloads  = 255;
+byte damage   = 1;
+byte ID       = 15;
+byte amount   = 25;
 
 unsigned long sendPacket; //This is what the tagger shoots
 
@@ -154,68 +167,70 @@ void loop() {
 
   //Pulse Received
     if(irrecv.decode(&results)){
-      Serial.print("received pulse");
+      Serial.println("received pulse");
       longToArray(results.value);
       irrecv.resume();
       received_pulse = true;
+      print_vars();
     }
 
   //Hit by admin tool
 
   if(received_pulse && packetA[0] == 0){
     Serial.println("Configuring tagger");
-    configure_tagger();
+    //configure_tagger();
     received_pulse = false;
   }
 
   //Compatibility 
-  if(received_pulse && compatibility_enabled && (results.value == 1067460051 || results.value == 2800112845 || results.value == 2031644225 || results.value == 2159483741)){ //ffa, t1, t2, t3
+  if(received_pulse && (results.value == 1067460051)){// || results.value == 2800112845 || results.value == 2031644225 || results.value == 2159483741)){ //ffa, t1, t2, t3
     
-    if(sendPacket == 1067460051 && results.value == 1067460051){ //Player is FFA and hit by FFA
+    //if(sendPacket == 1067460051 && results.value == 1067460051){ //Player is FFA and hit by FFA
+      Serial.println("Hit lol!");
       hit(true);
-    }
+    //}
 
     if(results.value != sendPacket && sendPacket != 1067460051 && results.value != 1067460051){ //Hit by non-friendly, non FFA
       hit(true);
     }
   }
   
-  //Not playing FFA, Hit by non-friendly, non-base
-  if(received_pulse && !compatibility_enabled && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team && team != 9){ //Byte 0 is between 1 and 14 indicating a team
-    hit(false);
-  }
-
-  //Playing FFA, hit by player playing FFA
-  if(received_pulse && !compatibility_enabled && packetA[1] == 9 && team == 9){ 
-    hit(false);  
-  }
-  
-  //Hit by base
-  if (received_pulse && packetA[1] == 15 && packetA[0] == team) { //Received packet from a friendly base station
-    baseRefill();
-  }
-
-  //Prevents spamming reload
-  if (!reload_ready && millis() > last_reload + reload_time) {
-    reload_ready = true;
-  }
-
-  //Prevents spamming shooting
-  if (!shoot_ready && millis() > last_shoot + shoot_time) {
-    shoot_ready = true;
-  }
-
+//  //Not playing FFA, Hit by non-friendly, non-base
+//  if(received_pulse && !compatibility_enabled && packetA[0] != 0 && packetA[0] <= 14 && packetA[1] != team && team != 9){ //Byte 0 is between 1 and 14 indicating a team
+//    hit(false);
+//  }
+//
+//  //Playing FFA, hit by player playing FFA
+//  if(received_pulse && !compatibility_enabled && packetA[1] == 9 && team == 9){ 
+//    hit(false);  
+//  }
+//  
+//  //Hit by base
+//  if (received_pulse && packetA[1] == 15 && packetA[0] == team) { //Received packet from a friendly base station
+//    baseRefill();
+//  }
+//
+//  //Prevents spamming reload
+//  if (!reload_ready && millis() > last_reload + reload_time) {
+//    reload_ready = true;
+//  }
+//
+//  //Prevents spamming shooting
+//  if (!shoot_ready && millis() > last_shoot + shoot_time) {
+//    shoot_ready = true;
+//  }
+//
   //Shoot
   //Only if the player is alive and is ready to shoot
-  if (digitalRead(trigger_pin) && !player_dead && reload_ready && shoot_ready) {
-    shoot();
-  }
+//  if (digitalRead(trigger_pin) && !player_dead && reload_ready && shoot_ready) {
+//    shoot();
+//  }
 
-  //Reload
-  if (digitalRead(reload_pin) && reload_ready && !dead) {
-    reload();
-  }
-
+//  //Reload
+//  if (digitalRead(reload_pin) && reload_ready && !player_dead) {
+//    reload();
+//  }
+//
   //Reset received_pulse status
   if (received_pulse) {
     received_pulse = false; //Already evaluated this hit, look for the next.
@@ -265,26 +280,32 @@ void loop() {
 
 
 void hit(bool compatibility){
-  Serial.println(" ");
-  Serial.println("Got hit");
-  Serial.println(" ");
-  if(compatibility && (hp == 0)){
-    hp=0;
-  }else if(compatibility && (hp > 1)){
-    hp--;
-  }else if(!compatibility && (hp < hex_decoder(packetA[2]))){
-    hp = 0;
-  }else if(!compatibility && (hp > hex_decoder(packetA[2]))){
-    hp = hp - hex_decoder(packetA[2]);
-  }
-  
   if(hp <= 0){
-    Serial.println(" ");
-    Serial.println("Dead!");
-    Serial.println(" ");
-    dead();
+    //dead();
+  }else{
+    hp--;
   }
-  //playFile("HIT.WAV");
+
+//  Serial.println(" ");
+//  Serial.println("Got hit");
+//  Serial.println(" ");
+//  if(compatibility && (hp == 0)){
+//    hp=0;
+//  }else if(compatibility && (hp > 1)){
+//    hp--;
+//  }else if(!compatibility && (hp < hex_decoder(packetA[2]))){
+//    hp = 0;
+//  }else if(!compatibility && (hp > hex_decoder(packetA[2]))){
+//    hp = hp - hex_decoder(packetA[2]);
+//  }
+//  
+//  if(hp <= 0){
+//    Serial.println(" ");
+//    Serial.println("Dead!");
+//    Serial.println(" ");
+//    dead();
+//  }
+  playFile("HIT.WAV");
   update_displays(hp, ammo, team);
 }
 
@@ -297,46 +318,49 @@ void baseRefill(){
 }
 
 void shoot() {
+  Serial.println("Shooting!");
   if (ammo > 0) {
     irsend.sendRC6(sendPacket, 32);
     irrecv.enableIRIn();
     ammo--;
     update_displays(hp, ammo, team);
-    //playFile("SHOOT.WAV");
-    last_shoot = millis();
-    shoot_ready = false;
+    playFile("SHOOT.WAV");
+//    last_shoot = millis();
+//    shoot_ready = false;
   }
   else {
-    //playFile("OOA.WAV");
+    playFile("OOA.WAV");
   }
 }
 
 void reload() {
-  if (reloads == 255) {
-    ammo = max_ammo;
-    //playFile("RELOAD.WAV");
-    last_reload = millis();
-    reload_ready = false;
-    update_displays(hp, ammo, team);
-  }
-  else if (reloads != 0) {
+  Serial.println("Reloading!");
+//  if (reloads == 255) {
+//    ammo = max_ammo;
+//    playFile("RELOAD.WAV");
+//    last_reload = millis();
+//    reload_ready = false;
+//    update_displays(hp, ammo, team);
+//  }
+//  else 
+if (reloads != 0) {
     ammo = max_ammo;
     reloads--;
-    //playFile("RELOAD.WAV");
+    playFile("RELOAD.WAV");
     last_reload = millis();
     reload_ready = false;
     update_displays(hp, ammo, team);
   }
   else {
-    //playFile("OOA.WAV");
+    playFile("OOA.WAV");
   }
 }
 
 void dead() {
   if (respawns <= 0) { //If respawns are already at 0, the player is now dead
     player_dead = true;
-    //playFile("DEAD.WAV");
-    //update_displays(0, 0, team);
+    playFile("DEAD.WAV");
+    update_displays(0, 0, team);
   }
  
   else{
@@ -345,8 +369,8 @@ void dead() {
     Serial.println(" ");
     respawns--; //Respawns are not yet 0, player is still alive.
     hp = 100; //Full health again
-    //update_displays(hp, ammo, team);
-    //playFile("RESPAWN.WAV");
+    update_displays(hp, ammo, team);
+    playFile("RESPAWN.WAV");
   }
 }
 
@@ -484,27 +508,27 @@ void update_displays(int d_hp, int d_ammo, byte d_team) {
   print_vars();
 }
 
-//void playFile(const char *filename)
-//{
-//  Serial.print("Playing audio file: ");
-//  Serial.println(filename);
-//
-//  // Start playing the file.  This sketch continues to
-//  // run while the file plays.
-//  playWav1.play(filename);
-//
-//  // A brief delay for the library read WAV info
-//  delay(5);
-//
-//  // Simply wait for the file to finish playing.
-//  //while (playWav1.isPlaying()) {
-//    // uncomment these lines if you audio shield
-//    // has the optional volume pot soldered
-//    //float vol = analogRead(15);
-//    //vol = vol / 1024;
-//    // sgtl5000_1.volume(vol);
-//  //}
-//}
+void playFile(const char *filename)
+{
+  Serial.print("Playing audio file: ");
+  Serial.println(filename);
+
+  // Start playing the file.  This sketch continues to
+  // run while the file plays.
+  playWav1.play(filename);
+
+  // A brief delay for the library read WAV info
+  delay(5);
+
+  // Simply wait for the file to finish playing.
+  //while (playWav1.isPlaying()) {
+    // uncomment these lines if you audio shield
+    // has the optional volume pot soldered
+    //float vol = analogRead(15);
+    //vol = vol / 1024;
+    // sgtl5000_1.volume(vol);
+  //}
+}
 
 
 ////////////////
