@@ -9,11 +9,11 @@
 */
 
 #include <IRremote.h>
-#include <Audio.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
-#include <SerialFlash.h>
+//#include <Audio.h>
+//#include <Wire.h>
+//#include <SPI.h>
+//#include <SD.h>
+//#include <SerialFlash.h>
 
 /////////////////////
 // Audio Things :3 //
@@ -128,23 +128,23 @@ void setup() {
   irrecv.enableIRIn();
 
   //Audio setup
-  AudioMemory(8);
+  //AudioMemory(8);
 
   // Comment these out if not using the audio adaptor board.
   // This may wait forever if the SDA & SCL pins lack
   // pullup resistors
-  sgtl5000_1.enable();
-  sgtl5000_1.volume(0.5);
+  //sgtl5000_1.enable();
+  //sgtl5000_1.volume(0.5);
 
-  SPI.setMOSI(SDCARD_MOSI_PIN);
-  SPI.setSCK(SDCARD_SCK_PIN);
-  if (!(SD.begin(SDCARD_CS_PIN))) {
+  //SPI.setMOSI(SDCARD_MOSI_PIN);
+  //SPI.setSCK(SDCARD_SCK_PIN);
+  //if (!(SD.begin(SDCARD_CS_PIN))) {
     // stop here, but print a message repetitively
-    while (1) {
-      Serial.println("Unable to access the SD card");
-      delay(500);
-    }
-  }
+  //  while (1) {
+  //    Serial.println("Unable to access the SD card");
+  //    delay(500);
+  //  }
+  //}
 }
 
 void loop() {
@@ -284,7 +284,7 @@ void hit(bool compatibility){
     Serial.println(" ");
     dead();
   }
-  playFile("HIT.WAV");
+  //playFile("HIT.WAV");
   update_displays(hp, ammo, team);
 }
 
@@ -292,7 +292,7 @@ void hit(bool compatibility){
 void baseRefill(){
   hp = hp + hex_decoder(packetA[3]);
   ammo = ammo + hex_decoder(packetA[4]);
-  playFile("REFILL.WAV");
+  //playFile("REFILL.WAV");
   update_displays(hp, ammo, team);
 }
 
@@ -302,19 +302,19 @@ void shoot() {
     irrecv.enableIRIn();
     ammo--;
     update_displays(hp, ammo, team);
-    playFile("SHOOT.WAV");
+    //playFile("SHOOT.WAV");
     last_shoot = millis();
     shoot_ready = false;
   }
   else {
-    playFile("OOA.WAV");
+    //playFile("OOA.WAV");
   }
 }
 
 void reload() {
   if (reloads == 255) {
     ammo = max_ammo;
-    playFile("RELOAD.WAV");
+    //playFile("RELOAD.WAV");
     last_reload = millis();
     reload_ready = false;
     update_displays(hp, ammo, team);
@@ -322,20 +322,20 @@ void reload() {
   else if (reloads != 0) {
     ammo = max_ammo;
     reloads--;
-    playFile("RELOAD.WAV");
+    //playFile("RELOAD.WAV");
     last_reload = millis();
     reload_ready = false;
     update_displays(hp, ammo, team);
   }
   else {
-    playFile("OOA.WAV");
+    //playFile("OOA.WAV");
   }
 }
 
 void dead() {
   if (respawns <= 0) { //If respawns are already at 0, the player is now dead
     player_dead = true;
-    playFile("DEAD.WAV");
+    //playFile("DEAD.WAV");
     //update_displays(0, 0, team);
   }
  
@@ -346,7 +346,7 @@ void dead() {
     respawns--; //Respawns are not yet 0, player is still alive.
     hp = 100; //Full health again
     //update_displays(hp, ammo, team);
-    playFile("RESPAWN.WAV");
+    //playFile("RESPAWN.WAV");
   }
 }
 
@@ -484,27 +484,27 @@ void update_displays(int d_hp, int d_ammo, byte d_team) {
   print_vars();
 }
 
-void playFile(const char *filename)
-{
-  Serial.print("Playing audio file: ");
-  Serial.println(filename);
-
-  // Start playing the file.  This sketch continues to
-  // run while the file plays.
-  playWav1.play(filename);
-
-  // A brief delay for the library read WAV info
-  delay(5);
-
-  // Simply wait for the file to finish playing.
-  //while (playWav1.isPlaying()) {
-    // uncomment these lines if you audio shield
-    // has the optional volume pot soldered
-    //float vol = analogRead(15);
-    //vol = vol / 1024;
-    // sgtl5000_1.volume(vol);
-  //}
-}
+//void playFile(const char *filename)
+//{
+//  Serial.print("Playing audio file: ");
+//  Serial.println(filename);
+//
+//  // Start playing the file.  This sketch continues to
+//  // run while the file plays.
+//  playWav1.play(filename);
+//
+//  // A brief delay for the library read WAV info
+//  delay(5);
+//
+//  // Simply wait for the file to finish playing.
+//  //while (playWav1.isPlaying()) {
+//    // uncomment these lines if you audio shield
+//    // has the optional volume pot soldered
+//    //float vol = analogRead(15);
+//    //vol = vol / 1024;
+//    // sgtl5000_1.volume(vol);
+//  //}
+//}
 
 
 ////////////////
